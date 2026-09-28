@@ -8,7 +8,7 @@ import {
   useGetSummaryQuery,
   useLogoutMutation,
 } from "@/store/api";
-import { buttonCls, ErrorState, linkCls, primaryButtonCls, Skeleton } from "@/components/ui/states";
+import { buttonCls, ErrorState, ghostButtonCls, linkCls, primaryButtonCls, Skeleton } from "@/components/ui/states";
 import { HistoryTable } from "./HistoryTable";
 import { PersonalBests } from "./PersonalBests";
 import { ProfileStats } from "./ProfileStats";
@@ -45,7 +45,7 @@ export function AccountView() {
   if (!user) {
     return (
       <div className="flex flex-col items-center gap-4 py-16 text-center">
-        <h1 className="text-2xl text-text">account</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-text">Account</h1>
         <p className="text-sub">Sign in to see your saved results and personal bests.</p>
         <Link href="/login?next=/account" className={primaryButtonCls}>
           Sign in
@@ -58,12 +58,12 @@ export function AccountView() {
     <div className="flex w-full flex-col gap-10">
       <section aria-labelledby="account-title" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 id="account-title" className="text-3xl text-text">
+          <h1 id="account-title" className="text-3xl font-semibold tracking-tight text-text">
             {user.username}
           </h1>
           <div className="flex gap-2">
             <Link href={`/u/${user.username}`} className={buttonCls}>
-              public profile
+              Public profile
             </Link>
             <button
               type="button"
@@ -72,9 +72,9 @@ export function AccountView() {
                 await logout();
                 router.replace("/");
               }}
-              className={buttonCls}
+              className={ghostButtonCls}
             >
-              {loggingOut ? "signing out…" : "sign out"}
+              {loggingOut ? "Signing out…" : "Sign out"}
             </button>
           </div>
         </div>
@@ -82,8 +82,8 @@ export function AccountView() {
       </section>
 
       <section aria-labelledby="pb-title" className="flex flex-col gap-4">
-        <h2 id="pb-title" className="text-xl text-text">
-          personal bests
+        <h2 id="pb-title" className="text-xl font-semibold tracking-tight text-text">
+          Personal bests
         </h2>
         <SummarySection />
         <p className="text-xs text-sub">
@@ -96,8 +96,8 @@ export function AccountView() {
       </section>
 
       <section aria-labelledby="history-title" className="flex flex-col gap-4">
-        <h2 id="history-title" className="text-xl text-text">
-          history
+        <h2 id="history-title" className="text-xl font-semibold tracking-tight text-text">
+          History
         </h2>
         <HistoryTable />
       </section>

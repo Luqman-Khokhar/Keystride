@@ -14,16 +14,16 @@ export function Standings({ slug, status, me }: { slug: string; status: Competit
   });
 
   return (
-    <section aria-labelledby="players-title" className="flex flex-col gap-3 rounded-lg bg-bg-alt p-5">
+    <section aria-labelledby="players-title" className="flex flex-col gap-3 rounded-surface border border-line bg-surface p-5">
       <div className="flex items-center justify-between gap-2">
-        <h2 id="players-title" className="text-lg text-text">
-          {status === "upcoming" ? "players" : "standings"}
+        <h2 id="players-title" className="text-lg font-semibold text-text">
+          {status === "upcoming" ? "Players" : "Standings"}
           {data && <span className="ml-2 text-sm text-sub">({data.playerCount})</span>}
         </h2>
         {status === "live" && (
           <span className="flex items-center gap-1.5 text-xs text-sub">
             <span aria-hidden="true" className="size-1.5 animate-pulse rounded-full bg-main motion-reduce:animate-none" />
-            updating live
+            Updating live
           </span>
         )}
       </div>
@@ -45,7 +45,7 @@ export function Standings({ slug, status, me }: { slug: string; status: Competit
                 key={e.username}
                 aria-current={isMe ? "true" : undefined}
                 className={`grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-2 rounded px-2 py-1.5 text-sm tabular-nums ${
-                  isMe ? "bg-sub-alt" : ""
+                  isMe ? "bg-main-soft" : ""
                 }`}
               >
                 <span className={e.rank && e.rank <= 3 ? "text-main" : "text-sub"}>{e.rank ?? "–"}</span>
@@ -61,7 +61,7 @@ export function Standings({ slug, status, me }: { slug: string; status: Competit
                     <span className="text-xs text-sub"> wpm · {Math.round(e.best.accuracy)}%</span>
                   </span>
                 ) : (
-                  <span className="text-right text-xs text-sub">{status === "upcoming" ? "ready" : "no score yet"}</span>
+                  <span className="text-right text-xs text-sub">{status === "upcoming" ? "Ready" : "No score yet"}</span>
                 )}
               </li>
             );

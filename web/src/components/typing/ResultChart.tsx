@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import type { SecondSample } from "@/lib/engine/types";
+import { CloseIcon } from "@/components/ui/icons";
 
 interface ResultChartProps {
   samples: SecondSample[];
@@ -62,20 +63,20 @@ export function ResultChart({ samples }: ResultChartProps) {
         {h ? (
           <>
             <span>{h.second}s</span>
-            <span className="text-main">wpm {Math.round(h.wpm)}</span>
-            <span className="text-text">raw {Math.round(h.raw)}</span>
-            <span className="text-error">errors {h.errors}</span>
+            <span className="text-main">WPM {Math.round(h.wpm)}</span>
+            <span className="text-text">Raw {Math.round(h.raw)}</span>
+            <span className="text-error">Errors {h.errors}</span>
           </>
         ) : (
           <>
             <span className="flex items-center gap-1">
-              <span aria-hidden="true" className="h-0.5 w-4 bg-main" /> wpm
+              <span aria-hidden="true" className="h-0.5 w-4 bg-main" /> WPM
             </span>
             <span className="flex items-center gap-1">
-              <span aria-hidden="true" className="h-0.5 w-4 border-t-2 border-dashed border-sub" /> raw
+              <span aria-hidden="true" className="h-0.5 w-4 border-t-2 border-dashed border-sub" /> Raw
             </span>
             <span className="flex items-center gap-1">
-              <span aria-hidden="true" className="text-error">×</span> errors
+              <CloseIcon className="size-3 text-error" /> Errors
             </span>
           </>
         )}
@@ -134,16 +135,13 @@ export function ResultChart({ samples }: ResultChartProps) {
 
             {samples.map((s, i) =>
               s.errors > 0 ? (
-                <text
+                <path
                   key={`e${s.second}`}
-                  x={geo.x(i)}
-                  y={geo.yErr(s.errors)}
-                  dy="0.35em"
-                  textAnchor="middle"
-                  className="fill-error text-xs font-bold"
-                >
-                  ×
-                </text>
+                  d={`M${geo.x(i) - 3},${geo.yErr(s.errors) - 3}l6,6m0,-6l-6,6`}
+                  className="stroke-error"
+                  strokeWidth={1.75}
+                  strokeLinecap="round"
+                />
               ) : null,
             )}
 

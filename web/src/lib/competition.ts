@@ -12,9 +12,9 @@ export const DURATIONS = [
 export const ATTEMPT_CAPS = [null, 1, 3, 5, 10] as const;
 
 export const STATUS_LABEL: Record<CompetitionStatus, string> = {
-  live: "live",
-  upcoming: "upcoming",
-  ended: "ended",
+  live: "Live",
+  upcoming: "Upcoming",
+  ended: "Ended",
 };
 
 /** Status from the clock, so the page flips to live/ended without waiting for a refetch. */

@@ -17,13 +17,13 @@ export function CompetitionCard({ comp, nowMs }: { comp: CompetitionSummary; now
     <li>
       <Link
         href={`/c/${comp.slug}`}
-        className="flex h-full flex-col gap-3 rounded-lg bg-bg-alt p-4 transition-colors hover:bg-sub-alt focus-visible:outline-2 focus-visible:outline-main active:opacity-80"
+        className="flex h-full flex-col gap-3 rounded-surface border border-line bg-surface p-4 transition-[border-color,transform] duration-200 ease-soft hover:-translate-y-0.5 hover:border-line-strong focus-visible:outline-2 focus-visible:outline-main active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       >
         <div className="flex items-center justify-between gap-2">
           <StatusBadge status={status} />
           <span className="text-xs tabular-nums text-sub">{timing}</span>
         </div>
-        <span className="line-clamp-2 text-lg break-words text-text">{comp.title}</span>
+        <span className="line-clamp-2 text-lg font-medium break-words text-text">{comp.title}</span>
         <span className="mt-auto flex flex-wrap gap-x-3 gap-y-1 text-xs text-sub">
           <span>{testLabel(comp.config)}</span>
           <span>

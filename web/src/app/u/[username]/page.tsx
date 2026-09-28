@@ -40,12 +40,12 @@ export default async function ProfilePage({ params }: PageProps<"/u/[username]">
     <main className="flex flex-1 flex-col py-10">
       <div className="flex w-full flex-col gap-8">
         <div className="flex flex-col gap-4">
-          <h1 className="text-3xl text-text">{p.username}</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-text">{p.username}</h1>
           <ProfileStats joined={p.createdAt} tests={p.tests} timeMs={p.timeMs} />
         </div>
         <section aria-labelledby="profile-pb" className="flex flex-col gap-4">
-          <h2 id="profile-pb" className="text-xl text-text">
-            personal bests
+          <h2 id="profile-pb" className="text-xl font-semibold tracking-tight text-text">
+            Personal bests
           </h2>
           <PersonalBests bests={p.bests} />
         </section>

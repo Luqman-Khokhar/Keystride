@@ -2,9 +2,9 @@ import { formatDate, formatDuration } from "@/lib/format";
 
 export function ProfileStats({ joined, tests, timeMs }: { joined: string; tests: number; timeMs: number }) {
   const items = [
-    { label: "joined", value: formatDate(joined) },
-    { label: "tests completed", value: tests.toLocaleString() },
-    { label: "time typing", value: formatDuration(timeMs) },
+    { label: "Joined", value: formatDate(joined) },
+    { label: "Tests completed", value: tests.toLocaleString() },
+    { label: "Time typing", value: formatDuration(timeMs) },
   ];
   return (
     <dl className="flex flex-wrap gap-x-10 gap-y-3">

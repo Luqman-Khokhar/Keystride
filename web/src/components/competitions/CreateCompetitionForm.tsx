@@ -9,7 +9,8 @@ import { errorMessage, fieldErrors, useCreateCompetitionMutation, useGetMeQuery 
 import type { CompetitionVisibility } from "@/store/types";
 import { Field } from "@/components/auth/Field";
 import { Row, Segmented, Switch } from "@/components/settings/controls";
-import { linkCls, primaryButtonCls, Skeleton } from "@/components/ui/states";
+import { AlertIcon } from "@/components/ui/icons";
+import { ghostButtonCls, primaryButtonCls, Skeleton } from "@/components/ui/states";
 
 /** datetime-local value (local time) → ISO string; "" → undefined. */
 const toIso = (local: string) => (local ? new Date(local).toISOString() : undefined);
@@ -24,8 +25,8 @@ function defaultLater(): string {
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
   return (
-    <p id={id} className="text-xs text-error">
-      <span aria-hidden="true">⚠ </span>
+    <p id={id} className="flex items-center gap-1 text-xs text-error">
+      <AlertIcon className="size-3.5" />
       {message}
     </p>
   );
@@ -61,7 +62,7 @@ export function CreateCompetitionForm() {
   if (!user) {
     return (
       <div className="flex flex-col items-center gap-4 py-16 text-center">
-        <h1 className="text-2xl text-text">create a competition</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-text">Create a competition</h1>
         <p className="text-sub">You need an account to host a competition.</p>
         <Link href="/login?next=/competitions/new" className={primaryButtonCls}>
           Sign in
@@ -96,16 +97,16 @@ export function CreateCompetitionForm() {
       className="flex w-full max-w-2xl flex-col gap-2"
       aria-labelledby="create-title"
     >
-      <h1 id="create-title" className="mb-2 text-2xl text-text">
-        create a competition
+      <h1 id="create-title" className="mb-2 text-2xl font-semibold tracking-tight text-text">
+        Create a competition
       </h1>
 
       <div className="flex flex-col gap-4 pb-4">
         <Field label="Title" name="title" required maxLength={60} placeholder="Friday night race"
           value={title} onChange={(e) => setTitle(e.target.value)} error={fields.title} />
         <div className="flex flex-col gap-1">
-          <label htmlFor={ids.desc} className="text-sm text-sub">
-            Description <span className="text-xs">(optional, {280 - description.length} characters left)</span>
+          <label htmlFor={ids.desc} className="text-sm font-medium text-text">
+            Description <span className="text-xs font-normal text-sub">(optional, {280 - description.length} characters left)</span>
           </label>
           <textarea
             id={ids.desc}
@@ -115,24 +116,24 @@ export function CreateCompetitionForm() {
             onChange={(e) => setDescription(e.target.value)}
             aria-invalid={fields.description ? true : undefined}
             aria-describedby={fields.description ? ids.descErr : undefined}
-            className="resize-y rounded-lg border-2 border-transparent bg-bg-alt px-3 py-2 text-text outline-none transition-colors hover:border-sub-alt focus-visible:border-main aria-invalid:border-error"
+            className="resize-y rounded-control border border-line-strong bg-surface px-3 py-2 text-text outline-none transition-[border-color,box-shadow] duration-150 hover:border-sub focus-visible:border-main focus-visible:ring-3 focus-visible:ring-main-soft aria-invalid:border-error"
           />
           <FieldError id={ids.descErr} message={fields.description} />
         </div>
       </div>
 
-      <Row title="test mode">
+      <Row title="Test mode">
         <Segmented
           label="Test mode"
           value={mode}
-          options={[{ value: "time", label: "time" }, { value: "words", label: "words" }]}
+          options={[{ value: "time", label: "Time" }, { value: "words", label: "Words" }]}
           onChange={(m) => {
             setMode(m);
             setAmount(m === "time" ? 30 : 25);
           }}
         />
       </Row>
-      <Row title={mode === "time" ? "seconds" : "words"}>
+      <Row title={mode === "time" ? "Seconds" : "Words"}>
         <Segmented
           label={mode === "time" ? "Test length in seconds" : "Test length in words"}
           value={String(amount)}
@@ -140,26 +141,26 @@ export function CreateCompetitionForm() {
           onChange={(v) => setAmount(Number(v))}
         />
       </Row>
-      <Row title="punctuation">
+      <Row title="Punctuation">
         <Switch label="Punctuation" checked={punctuation} onChange={setPunctuation} />
       </Row>
-      <Row title="numbers">
+      <Row title="Numbers">
         <Switch label="Numbers" checked={numbers} onChange={setNumbers} />
       </Row>
-      <Row title="who can find it" description="Link-only competitions don't appear in the public list.">
+      <Row title="Who can find it" description="Link-only competitions don't appear in the public list.">
         <Segmented
           label="Visibility"
           value={visibility}
-          options={[{ value: "public", label: "public" }, { value: "unlisted", label: "link only" }]}
+          options={[{ value: "public", label: "Public" }, { value: "unlisted", label: "Link only" }]}
           onChange={setVisibility}
         />
       </Row>
-      <Row title="start">
+      <Row title="Start">
         <div className="flex flex-col items-start gap-2 sm:items-end">
           <Segmented
             label="Start"
             value={startNow ? "now" : "later"}
-            options={[{ value: "now", label: "now" }, { value: "later", label: "later" }]}
+            options={[{ value: "now", label: "Now" }, { value: "later", label: "Later" }]}
             onChange={(v) => setStartNow(v === "now")}
           />
           {!startNow && (
@@ -174,14 +175,14 @@ export function CreateCompetitionForm() {
                 onChange={(e) => setStartLocal(e.target.value)}
                 aria-invalid={fields.startsAt ? true : undefined}
                 aria-describedby={fields.startsAt ? ids.startErr : undefined}
-                className="rounded-lg border-2 border-transparent bg-bg-alt px-3 py-1.5 text-text outline-none hover:border-sub-alt focus-visible:border-main aria-invalid:border-error"
+                className="rounded-control border border-line-strong bg-surface px-3 py-1.5 text-text outline-none transition-[border-color,box-shadow] duration-150 hover:border-sub focus-visible:border-main focus-visible:ring-3 focus-visible:ring-main-soft aria-invalid:border-error"
               />
               <FieldError id={ids.startErr} message={fields.startsAt} />
             </>
           )}
         </div>
       </Row>
-      <Row title="duration" description="How long the competition stays open.">
+      <Row title="Duration" description="How long the competition stays open.">
         <Segmented
           label="Duration"
           value={String(duration)}
@@ -189,15 +190,15 @@ export function CreateCompetitionForm() {
           onChange={(v) => setDuration(Number(v))}
         />
       </Row>
-      <Row title="attempts per player" description="Best verified attempt counts.">
+      <Row title="Attempts per player" description="Best verified attempt counts.">
         <Segmented
           label="Attempts per player"
           value={String(maxAttempts)}
-          options={ATTEMPT_CAPS.map((n) => ({ value: String(n), label: n === null ? "unlimited" : String(n) }))}
+          options={ATTEMPT_CAPS.map((n) => ({ value: String(n), label: n === null ? "Unlimited" : String(n) }))}
           onChange={(v) => setMaxAttempts(v === "null" ? null : Number(v))}
         />
       </Row>
-      <Row title="max players" description="Between 2 and 100.">
+      <Row title="Max players" description="Between 2 and 100.">
         <div className="flex flex-col items-start gap-1 sm:items-end">
           <label htmlFor={ids.players} className="sr-only">
             Max players
@@ -212,25 +213,25 @@ export function CreateCompetitionForm() {
             onChange={(e) => setMaxPlayers(e.target.value)}
             aria-invalid={fields.maxPlayers ? true : undefined}
             aria-describedby={fields.maxPlayers ? ids.playersErr : undefined}
-            className="w-24 rounded-lg border-2 border-transparent bg-bg-alt px-3 py-1.5 text-text outline-none transition-colors hover:border-sub-alt focus-visible:border-main aria-invalid:border-error"
+            className="w-24 rounded-control border border-line-strong bg-surface px-3 py-1.5 text-text outline-none transition-[border-color,box-shadow] duration-150 hover:border-sub focus-visible:border-main focus-visible:ring-3 focus-visible:ring-main-soft aria-invalid:border-error"
           />
           <FieldError id={ids.playersErr} message={fields.maxPlayers} />
         </div>
       </Row>
 
       {error && (fieldKeys.length === 0 || fieldKeys.some((k) => !["title", "description", "startsAt", "maxPlayers"].includes(k))) && (
-        <p role="alert" className="text-sm text-error">
-          <span aria-hidden="true">⚠ </span>
+        <p role="alert" className="flex items-center gap-1.5 text-sm text-error">
+          <AlertIcon className="size-4" />
           {fieldKeys.length ? Object.values(fields)[0] : errorMessage(error, "Couldn't create the competition")}
         </p>
       )}
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-sub-alt pt-4">
+      <div className="flex flex-wrap items-center gap-3 border-t border-line pt-4">
         <button type="submit" disabled={isLoading} className={primaryButtonCls}>
           {isLoading ? "Creating…" : "Create competition"}
         </button>
-        <Link href="/competitions" className={linkCls}>
-          cancel
+        <Link href="/competitions" className={ghostButtonCls}>
+          Cancel
         </Link>
       </div>
     </form>

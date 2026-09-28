@@ -16,9 +16,9 @@ export function PersonalBests({ bests }: { bests: PersonalBest[] }) {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {groups.map((g) => (
-        <section key={g.mode} aria-labelledby={`pb-${g.mode}`} className="rounded-lg bg-bg-alt p-4">
-          <h3 id={`pb-${g.mode}`} className="mb-3 text-sm text-sub">
-            {g.mode} personal bests
+        <section key={g.mode} aria-labelledby={`pb-${g.mode}`} className="rounded-surface border border-line bg-surface p-4">
+          <h3 id={`pb-${g.mode}`} className="mb-3 text-sm font-medium text-sub">
+            {g.mode === "time" ? "Timed tests" : "Word-count tests"}
           </h3>
           <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {g.amounts.map((a) => {
@@ -28,8 +28,8 @@ export function PersonalBests({ bests }: { bests: PersonalBest[] }) {
                   <dt className="text-xs text-sub">
                     {a} <span className="sr-only">{g.unit}</span>
                   </dt>
-                  <dd className="text-2xl tabular-nums text-main">{pb ? Math.round(pb.wpm) : "–"}</dd>
-                  <dd className="text-xs tabular-nums text-sub">{pb ? `${Math.round(pb.accuracy)}%` : "no result"}</dd>
+                  <dd className="font-mono text-2xl tabular-nums text-text">{pb ? Math.round(pb.wpm) : "–"}</dd>
+                  <dd className="text-xs tabular-nums text-sub">{pb ? `${Math.round(pb.accuracy)}%` : "No result"}</dd>
                 </div>
               );
             })}

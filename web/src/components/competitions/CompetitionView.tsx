@@ -13,6 +13,7 @@ import {
 } from "@/store/api";
 import type { CompetitionDetail, CompetitionStatus } from "@/store/types";
 import { ErrorState, linkCls, primaryButtonCls, Skeleton, Spinner } from "@/components/ui/states";
+import { AlertIcon } from "@/components/ui/icons";
 import { CompetitionDetails } from "./CompetitionDetails";
 import { Standings } from "./Standings";
 import { useServerClock } from "./useServerClock";
@@ -25,7 +26,7 @@ const CompetitionPlay = dynamic(() => import("./CompetitionPlay"), {
 
 function Panel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-lg bg-bg-alt px-6 py-10 text-center">
+    <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-surface border border-line px-6 py-10 text-center">
       {children}
     </div>
   );
@@ -39,8 +40,8 @@ function JoinButton({ slug }: { slug: string }) {
         {isLoading ? "Joining…" : "Join competition"}
       </button>
       {error && (
-        <p role="alert" className="text-sm text-error">
-          <span aria-hidden="true">⚠ </span>
+        <p role="alert" className="flex items-center gap-1.5 text-sm text-error">
+          <AlertIcon className="size-4" />
           {errorMessage(error, "Couldn't join")}
         </p>
       )}
@@ -62,7 +63,7 @@ function MainArea({ comp, status, nowMs }: { comp: CompetitionDetail; status: Co
   if (status === "ended") {
     return (
       <Panel>
-        <p className="text-2xl text-text">This competition has ended</p>
+        <p className="text-2xl font-semibold tracking-tight text-text">This competition has ended</p>
         <p className="text-sub">Final standings are on the right.</p>
         <Link href="/competitions/new" className={primaryButtonCls}>
           Create a new competition
@@ -86,8 +87,8 @@ function MainArea({ comp, status, nowMs }: { comp: CompetitionDetail; status: Co
   if (status === "upcoming") {
     return (
       <Panel>
-        <p className="text-sub">starts in</p>
-        <p className="text-5xl tabular-nums text-main">{formatRemaining(Date.parse(comp.startsAt) - nowMs)}</p>
+        <p className="text-sub">Starts in</p>
+        <p className="font-mono text-5xl tabular-nums text-main">{formatRemaining(Date.parse(comp.startsAt) - nowMs)}</p>
         <p className="max-w-md text-sm text-sub">
           The text is revealed when the competition starts, so everyone sees it at the same time.
           {joined && " You're in — come back when the timer hits zero."}
@@ -101,7 +102,7 @@ function MainArea({ comp, status, nowMs }: { comp: CompetitionDetail; status: Co
   if (cta) {
     return (
       <Panel>
-        <p className="text-2xl text-text">Competition is live</p>
+        <p className="text-2xl font-semibold tracking-tight text-text">Competition is live</p>
         <p className="max-w-md text-sm text-sub">
           Everyone types the same {comp.config.mode === "time" ? `${comp.config.amount}-second` : `${comp.config.amount}-word`} test.
           {comp.maxAttempts ? ` You get ${comp.maxAttempts} attempt${comp.maxAttempts === 1 ? "" : "s"}` : " Unlimited attempts"} —
@@ -119,7 +120,7 @@ function MainArea({ comp, status, nowMs }: { comp: CompetitionDetail; status: Co
     <div className="flex flex-col gap-3">
       {comp.maxAttempts !== null && (
         <p className="text-center text-sm text-sub">
-          attempt {Math.min(used + 1, comp.maxAttempts)} of {comp.maxAttempts}
+          Attempt {Math.min(used + 1, comp.maxAttempts)} of {comp.maxAttempts}
         </p>
       )}
       <CompetitionPlay slug={comp.slug} config={comp.config} words={comp.words} canRetry={canRetry} />
@@ -131,7 +132,7 @@ function MainArea({ comp, status, nowMs }: { comp: CompetitionDetail; status: Co
 function OutOfAttempts({ comp }: { comp: CompetitionDetail }) {
   return (
     <Panel>
-      <p className="text-xl text-text">You&apos;ve used all {comp.maxAttempts} attempts</p>
+      <p className="text-xl font-semibold text-text">You&apos;ve used all {comp.maxAttempts} attempts</p>
       {comp.me?.best ? (
         <p className="text-sub">
           Your best: <span className="text-main">{Math.round(comp.me.best.wpm)} wpm</span> at{" "}
@@ -166,7 +167,7 @@ export function CompetitionView({ slug }: { slug: string }) {
   if (errorStatus(error) === 404 || errorStatus(error) === 400) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
-        <h1 className="text-2xl text-text">competition not found</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-text">Competition not found</h1>
         <p className="text-sub">
           The link may be wrong, or the creator deleted it.{" "}
           <Link href="/competitions" className={linkCls}>

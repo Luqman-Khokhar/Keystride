@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 function TypingTestSkeleton() {
   return (
     <div className="flex w-full flex-col items-center gap-6" aria-busy="true" aria-label="Loading typing test">
-      <div className="h-9 w-full max-w-xl animate-pulse rounded-lg bg-bg-alt motion-reduce:animate-none" />
+      <div className="h-9 w-full max-w-xl animate-pulse rounded-surface bg-bg-alt motion-reduce:animate-none" />
       <div className="flex w-full flex-col gap-2">
         <div className="h-8" />
         <div className="words-window flex flex-col justify-around">

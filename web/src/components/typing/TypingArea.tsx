@@ -236,7 +236,7 @@ export function TypingArea({ session, inputRef }: TypingAreaProps) {
         <button
           type="button"
           onClick={focusInput}
-          className="absolute inset-0 flex items-center justify-center rounded-lg text-sm text-text focus-visible:outline-2 focus-visible:outline-main"
+          className="absolute inset-0 flex items-center justify-center rounded-surface text-sm text-text focus-visible:outline-2 focus-visible:outline-main"
         >
           Click here or press any key to focus
         </button>

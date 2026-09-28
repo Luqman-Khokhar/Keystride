@@ -74,7 +74,7 @@ export function LiveCounter({ session }: LiveCounterProps) {
 
   return (
     <div
-      className={`flex h-8 items-baseline gap-6 text-2xl tabular-nums text-main transition-opacity duration-200 ${
+      className={`flex h-8 items-baseline gap-6 font-mono text-2xl tabular-nums text-main transition-opacity duration-200 ${
         running ? "opacity-100" : "opacity-0"
       }`}
       aria-hidden={!running}
