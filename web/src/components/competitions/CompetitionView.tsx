@@ -12,8 +12,9 @@ import {
   useJoinCompetitionMutation,
 } from "@/store/api";
 import type { CompetitionDetail, CompetitionStatus } from "@/store/types";
-import { ErrorState, linkCls, primaryButtonCls, Skeleton, Spinner } from "@/components/ui/states";
+import { ErrorState, primaryButtonCls, Skeleton, Spinner } from "@/components/ui/states";
 import { AlertIcon } from "@/components/ui/icons";
+import { StatusPage } from "@/components/ui/StatusPage";
 import { CompetitionDetails } from "./CompetitionDetails";
 import { Standings } from "./Standings";
 import { useServerClock } from "./useServerClock";
@@ -172,16 +173,18 @@ export function CompetitionView({ slug }: { slug: string }) {
   }
   if (errorStatus(error) === 404 || errorStatus(error) === 400) {
     return (
-      <div className="flex flex-col items-center gap-3 py-16 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight text-text">Competition not found</h1>
-        <p className="text-sub">
-          The link may be wrong, or the creator deleted it.{" "}
-          <Link href="/competitions" className={linkCls}>
+      <StatusPage
+        as="div"
+        code="404"
+        title="Competition not found"
+        actions={
+          <Link href="/competitions" className={primaryButtonCls}>
             Browse competitions
           </Link>
-          .
-        </p>
-      </div>
+        }
+      >
+        The link may be wrong, or the creator deleted it.
+      </StatusPage>
     );
   }
   if (error || !comp || !status) {

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { PRESETS } from "@/lib/presets";
 import { jsonLd } from "@/lib/site";
+import { PlusIcon } from "@/components/ui/icons";
 import { buttonCls, linkCls } from "@/components/ui/states";
+import { SpeedScale, type SpeedLevel } from "./SpeedScale";
 
 export const FAQ = [
   {
@@ -22,12 +24,12 @@ export const FAQ = [
   },
 ];
 
-const SPEEDS = [
-  ["under 30", "Beginner, still finding keys"],
-  ["30–50", "Average everyday typist"],
-  ["50–70", "Above average"],
-  ["70–100", "Fast, touch typing"],
-  ["100+", "Exceptional"],
+const SPEEDS: SpeedLevel[] = [
+  { range: "under 30", label: "Beginner, still finding keys", from: 0 },
+  { range: "30–50", label: "Average everyday typist", from: 30 },
+  { range: "50–70", label: "Above average", from: 50 },
+  { range: "70–100", label: "Fast, touch typing", from: 70 },
+  { range: "100+", label: "Exceptional", from: 100 },
 ];
 
 /** SEO-friendly content below the test: explanation, benchmarks, tips, FAQ, internal links. */
@@ -56,25 +58,7 @@ export function TestGuide({ intro, currentSlug }: { intro?: string; currentSlug?
 
       <div className="flex flex-col gap-3">
         <h2 className="text-xl font-semibold tracking-tight text-text">What&apos;s a good typing speed?</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-xs border-collapse text-left text-sm">
-            <caption className="sr-only">Typing speed benchmarks</caption>
-            <thead>
-              <tr>
-                <th scope="col" className="py-2 pr-6 font-medium text-sub">Words per minute</th>
-                <th scope="col" className="py-2 font-medium text-sub">Level</th>
-              </tr>
-            </thead>
-            <tbody>
-              {SPEEDS.map(([wpm, level]) => (
-                <tr key={wpm} className="border-t border-line">
-                  <td className="py-2 pr-6 font-mono tabular-nums text-text">{wpm}</td>
-                  <td className="py-2 text-text">{level}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <SpeedScale levels={SPEEDS} />
         <p className="text-xs">A rough guide — accuracy of 95% or more matters as much as the raw number.</p>
       </div>
 
@@ -95,24 +79,30 @@ export function TestGuide({ intro, currentSlug }: { intro?: string; currentSlug?
         </ul>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         <h2 className="text-xl font-semibold tracking-tight text-text">Frequently asked questions</h2>
-        {FAQ.map((f) => (
-          <div key={f.q} className="flex flex-col gap-1">
-            <h3 className="font-medium text-text">{f.q}</h3>
-            <p>{f.a}</p>
-          </div>
-        ))}
+        <div className="divide-y divide-line border-y border-line">
+          {FAQ.map((f) => (
+            // Answers stay in the HTML (and the FAQ JSON-LD) while collapsed.
+            <details key={f.q} className="group">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-control py-3 font-medium text-text focus-visible:outline-2 focus-visible:outline-main [&::-webkit-details-marker]:hidden">
+                <h3>{f.q}</h3>
+                <PlusIcon className="size-4 text-sub transition-transform duration-200 group-open:rotate-45 motion-reduce:transition-none" />
+              </summary>
+              <p className="pb-4">{f.a}</p>
+            </details>
+          ))}
+        </div>
       </div>
 
       <nav aria-labelledby="more-tests" className="flex flex-col gap-3">
         <h2 id="more-tests" className="text-xl font-semibold tracking-tight text-text">
           More typing tests
         </h2>
-        <ul className="flex flex-wrap gap-2">
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {currentSlug && (
             <li>
-              <Link href="/" className={buttonCls}>
+              <Link href="/" className={`${buttonCls} w-full justify-start`}>
                 Typing test
               </Link>
             </li>
@@ -121,7 +111,7 @@ export function TestGuide({ intro, currentSlug }: { intro?: string; currentSlug?
             <li key={p.slug}>
               <Link
                 href={`/typing-test/${p.slug}`}
-                className={buttonCls}
+                className={`${buttonCls} w-full justify-start`}
               >
                 {p.h1}
               </Link>
