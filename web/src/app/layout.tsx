@@ -18,6 +18,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   openGraph: { siteName: SITE_NAME, type: "website", locale: "en_US" },
   twitter: { card: "summary_large_image" },
+  // Google Search Console ownership (keep: removing it un-verifies the site).
+  verification: { google: "8PHYInyf3U4kzbNEVRPigBbeAri5BWCT-wA_M3i2k3Q" },
   description:
     "Fast, minimal typing speed test. Measure your words per minute, accuracy, and consistency with timed and word-count tests.",
 };
