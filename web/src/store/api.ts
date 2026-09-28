@@ -11,7 +11,6 @@ import type {
   Standings,
   HistoryPage,
   Leaderboard,
-  Profile,
   SubmitResponse,
   Summary,
   User,
@@ -34,7 +33,7 @@ async function setMeOnSuccess(
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: "/api", credentials: "same-origin" }),
-  tagTypes: ["Me", "History", "Summary", "Leaderboard", "Profile", "Competitions", "Competition", "Standings"],
+  tagTypes: ["Me", "History", "Summary", "Leaderboard", "Competitions", "Competition", "Standings"],
   endpoints: (b) => ({
     getMe: b.query<User | null, void>({
       // Signed out → { user: null }, not an error.
@@ -64,7 +63,7 @@ export const api = createApi({
     }),
     submitResult: b.mutation<SubmitResponse, ResultSubmission>({
       query: (body) => ({ url: "/results", method: "POST", body }),
-      invalidatesTags: ["History", "Summary", "Leaderboard", "Profile"],
+      invalidatesTags: ["History", "Summary", "Leaderboard"],
     }),
     getHistory: b.infiniteQuery<HistoryPage, void, string | null>({
       infiniteQueryOptions: {
@@ -82,10 +81,6 @@ export const api = createApi({
     getLeaderboard: b.query<Leaderboard, 15 | 60>({
       query: (amount) => `/leaderboard?mode=time&amount=${amount}`,
       providesTags: ["Leaderboard"],
-    }),
-    getProfile: b.query<Profile, string>({
-      query: (username) => `/users/${encodeURIComponent(username)}`,
-      providesTags: ["Profile"],
     }),
     getCompetitions: b.infiniteQuery<CompetitionPage, CompetitionStatus | "mine", string | null>({
       infiniteQueryOptions: {
@@ -144,7 +139,6 @@ export const {
   useGetHistoryInfiniteQuery,
   useGetSummaryQuery,
   useGetLeaderboardQuery,
-  useGetProfileQuery,
   useGetCompetitionsInfiniteQuery,
   useGetCompetitionQuery,
   useGetStandingsQuery,

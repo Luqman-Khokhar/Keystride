@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SETTINGS_BOOT_SCRIPT } from "@/lib/settings/settings";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { StoreProvider } from "@/store/StoreProvider";
 import "./globals.css";
 
@@ -13,7 +14,10 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: { default: "Keystride — Typing Speed Test", template: "%s · Keystride" },
-  applicationName: "Keystride",
+  applicationName: SITE_NAME,
+  metadataBase: new URL(SITE_URL),
+  openGraph: { siteName: SITE_NAME, type: "website", locale: "en_US" },
+  twitter: { card: "summary_large_image" },
   description:
     "Fast, minimal typing speed test. Measure your words per minute, accuracy, and consistency with timed and word-count tests.",
 };

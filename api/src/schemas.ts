@@ -55,6 +55,8 @@ export const leaderboardQuery = z.object({
   amount: z.coerce.number().pipe(z.union([z.literal(15), z.literal(60)])).default(15),
 });
 
+export const resultIdParams = z.object({ id: z.string().regex(/^[a-f0-9]{24}$/, "Invalid result id") });
+
 export const historyQuery = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
   before: z.iso.datetime().optional(),

@@ -147,6 +147,7 @@ export interface CreateCompetitionInput {
 }
 
 export interface AttemptResponse {
+  resultId: string;
   wpm: number;
   accuracy: number;
   counted: boolean;
@@ -156,4 +157,25 @@ export interface AttemptResponse {
   attemptsLeft: number | null;
   rank: number | null;
   best: number | null;
+}
+
+/** Public share view of a verified result (/r/<id>). */
+export interface PublicResult {
+  id: string;
+  username: string;
+  wpm: number;
+  rawWpm: number;
+  accuracy: number;
+  consistency: number;
+  chars: { correct: number; incorrect: number; extra: number; missed: number };
+  mode: "time" | "words";
+  amount: number;
+  punctuation: boolean;
+  numbers: boolean;
+  language: string;
+  durationMs: number;
+  isPb: boolean;
+  competitionSlug: string | null;
+  createdAt: string;
+  samples: { second: number; wpm: number; raw: number; errors: number }[];
 }

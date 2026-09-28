@@ -26,7 +26,7 @@ function TypingTestSkeleton() {
 
 // Random words + localStorage settings exist only in the browser, so skip SSR
 // for the test itself; the page shell and SEO content still render on the server.
-export const TypingTestLoader = dynamic(() => import("./TypingTest"), {
+export const TypingTestLoader = dynamic<{ initialConfig?: import("@keystride/engine").TestConfig }>(() => import("./TypingTest"), {
   ssr: false,
   loading: TypingTestSkeleton,
 });

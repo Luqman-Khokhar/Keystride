@@ -6,7 +6,8 @@ import { MongoRateLimitStore } from "../lib/rateLimitStore";
 import { verifySubmission } from "../lib/verify";
 import { requireAuth } from "../middleware/auth";
 import { ResultModel } from "../models/Result";
-import { historyQuery, submissionSchema } from "../schemas";
+import { UserModel } from "../models/User";
+import { historyQuery, resultIdParams, submissionSchema } from "../schemas";
 
 export const resultsRouter = Router();
 
@@ -140,4 +141,26 @@ resultsRouter.get("/me/summary", requireAuth, async (req, res) => {
   const uid = userId(req);
   const [bests, totals] = await Promise.all([ResultModel.aggregate(bestsPipeline(uid)), userTotals(uid)]);
   res.json({ bests, ...totals });
+});
+
+/**
+ * Public share view of one result. Flagged (unverified) results are never shown,
+ * so a share link always means a verified score.
+ */
+resultsRouter.get("/:id", async (req, res) => {
+  const { id } = parse(resultIdParams, req.params);
+  const r = await ResultModel.findOne({ _id: id, deletedAt: null, flagged: false })
+    .select(`${RESULT_FIELDS} userId samples`)
+    .lean();
+  if (!r) throw new HttpError(404, "Result not found");
+  const user = await UserModel.findOne({ _id: r.userId, deletedAt: null }).select("username").lean();
+  if (!user) throw new HttpError(404, "Result not found");
+
+  const { _id, userId: _uid, flagged: _f, samples, ...rest } = r;
+  res.json({
+    id: String(_id),
+    username: user.username,
+    ...rest,
+    samples: (samples ?? []).map((s) => ({ second: s.second, wpm: s.wpm, raw: s.raw, errors: s.errors })),
+  });
 });

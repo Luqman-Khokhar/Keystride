@@ -7,6 +7,7 @@ import { HttpError } from "./lib/http";
 import { loadUser, requireJson } from "./middleware/auth";
 import { authRouter } from "./routes/auth";
 import { competitionsRouter } from "./routes/competitions";
+import { sitemapRouter } from "./routes/sitemap";
 import { leaderboardRouter } from "./routes/leaderboard";
 import { resultsRouter } from "./routes/results";
 import { usersRouter } from "./routes/users";
@@ -54,6 +55,7 @@ export function configureApp(app: Express) {
   app.use("/api/users", usersRouter);
   app.use("/api/leaderboard", leaderboardRouter);
   app.use("/api/competitions", competitionsRouter);
+  app.use("/api/sitemap", sitemapRouter);
 
   app.use((_req, _res, next) => next(new HttpError(404, "Not found")));
 
