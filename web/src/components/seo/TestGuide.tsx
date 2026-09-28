@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PRESETS } from "@/lib/presets";
 import { jsonLd } from "@/lib/site";
+import { buttonCls, linkCls } from "@/components/ui/states";
 
 export const FAQ = [
   {
@@ -22,11 +23,11 @@ export const FAQ = [
 ];
 
 const SPEEDS = [
-  ["under 30", "beginner — still finding keys"],
-  ["30–50", "average everyday typist"],
-  ["50–70", "above average"],
-  ["70–100", "fast — touch typing"],
-  ["100+", "exceptional"],
+  ["under 30", "Beginner, still finding keys"],
+  ["30–50", "Average everyday typist"],
+  ["50–70", "Above average"],
+  ["70–100", "Fast, touch typing"],
+  ["100+", "Exceptional"],
 ];
 
 /** SEO-friendly content below the test: explanation, benchmarks, tips, FAQ, internal links. */
@@ -34,7 +35,7 @@ export function TestGuide({ intro, currentSlug }: { intro?: string; currentSlug?
   const others = PRESETS.filter((p) => p.slug !== currentSlug);
 
   return (
-    <section aria-labelledby="guide-title" className="mx-auto flex w-full max-w-3xl flex-col gap-10 border-t border-sub-alt py-16 text-sub">
+    <section aria-labelledby="guide-title" className="mx-auto flex w-full max-w-2xl flex-col gap-12 border-t border-line py-16 leading-relaxed text-sub">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd({
         "@context": "https://schema.org",
         "@type": "FAQPage",
@@ -42,8 +43,8 @@ export function TestGuide({ intro, currentSlug }: { intro?: string; currentSlug?
       })} />
 
       <div className="flex flex-col gap-3">
-        <h2 id="guide-title" className="text-xl text-text">
-          about this typing test
+        <h2 id="guide-title" className="text-xl font-semibold tracking-tight text-text">
+          About this typing test
         </h2>
         {intro && <p>{intro}</p>}
         <p>
@@ -54,20 +55,20 @@ export function TestGuide({ intro, currentSlug }: { intro?: string; currentSlug?
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-xl text-text">what&apos;s a good typing speed?</h2>
+        <h2 className="text-xl font-semibold tracking-tight text-text">What&apos;s a good typing speed?</h2>
         <div className="overflow-x-auto">
           <table className="w-full min-w-xs border-collapse text-left text-sm">
             <caption className="sr-only">Typing speed benchmarks</caption>
             <thead>
               <tr>
-                <th scope="col" className="py-2 pr-6 font-normal text-sub">words per minute</th>
-                <th scope="col" className="py-2 font-normal text-sub">level</th>
+                <th scope="col" className="py-2 pr-6 font-medium text-sub">Words per minute</th>
+                <th scope="col" className="py-2 font-medium text-sub">Level</th>
               </tr>
             </thead>
             <tbody>
               {SPEEDS.map(([wpm, level]) => (
-                <tr key={wpm} className="border-t border-sub-alt">
-                  <td className="py-2 pr-6 tabular-nums text-main">{wpm}</td>
+                <tr key={wpm} className="border-t border-line">
+                  <td className="py-2 pr-6 font-mono tabular-nums text-text">{wpm}</td>
                   <td className="py-2 text-text">{level}</td>
                 </tr>
               ))}
@@ -78,7 +79,7 @@ export function TestGuide({ intro, currentSlug }: { intro?: string; currentSlug?
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-xl text-text">how to type faster</h2>
+        <h2 className="text-xl font-semibold tracking-tight text-text">How to type faster</h2>
         <ul className="flex list-disc flex-col gap-2 pl-5">
           <li>Keep your fingers on the home row (ASDF / JKL;) and return to it after every word.</li>
           <li>Look at the screen, not the keyboard — touch typing is where real speed comes from.</li>
@@ -86,7 +87,7 @@ export function TestGuide({ intro, currentSlug }: { intro?: string; currentSlug?
           <li>Practise a little every day. Short 30 second tests repeated often beat one long session.</li>
           <li>
             Race friends in a{" "}
-            <Link href="/competitions" className="text-main underline-offset-4 hover:underline">
+            <Link href="/competitions" className={linkCls}>
               typing competition
             </Link>{" "}
             to stay motivated.
@@ -95,24 +96,24 @@ export function TestGuide({ intro, currentSlug }: { intro?: string; currentSlug?
       </div>
 
       <div className="flex flex-col gap-4">
-        <h2 className="text-xl text-text">frequently asked questions</h2>
+        <h2 className="text-xl font-semibold tracking-tight text-text">Frequently asked questions</h2>
         {FAQ.map((f) => (
           <div key={f.q} className="flex flex-col gap-1">
-            <h3 className="text-text">{f.q}</h3>
+            <h3 className="font-medium text-text">{f.q}</h3>
             <p>{f.a}</p>
           </div>
         ))}
       </div>
 
       <nav aria-labelledby="more-tests" className="flex flex-col gap-3">
-        <h2 id="more-tests" className="text-xl text-text">
-          more typing tests
+        <h2 id="more-tests" className="text-xl font-semibold tracking-tight text-text">
+          More typing tests
         </h2>
         <ul className="flex flex-wrap gap-2">
           {currentSlug && (
             <li>
-              <Link href="/" className="inline-block rounded-lg bg-bg-alt px-3 py-1.5 text-sm text-text hover:bg-sub-alt focus-visible:outline-2 focus-visible:outline-main">
-                typing test
+              <Link href="/" className={buttonCls}>
+                Typing test
               </Link>
             </li>
           )}
@@ -120,7 +121,7 @@ export function TestGuide({ intro, currentSlug }: { intro?: string; currentSlug?
             <li key={p.slug}>
               <Link
                 href={`/typing-test/${p.slug}`}
-                className="inline-block rounded-lg bg-bg-alt px-3 py-1.5 text-sm text-text hover:bg-sub-alt focus-visible:outline-2 focus-visible:outline-main"
+                className={buttonCls}
               >
                 {p.h1}
               </Link>

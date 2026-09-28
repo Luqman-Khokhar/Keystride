@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { formatDateTime, testLabel } from "@/lib/format";
 import { errorMessage, useGetHistoryInfiniteQuery } from "@/store/api";
+import { ShieldAlertIcon, StarIcon } from "@/components/ui/icons";
 import { buttonCls, EmptyState, ErrorState, linkCls, Skeleton, Spinner } from "@/components/ui/states";
 
 export function HistoryTable() {
@@ -40,21 +41,21 @@ export function HistoryTable() {
           <caption className="sr-only">Your recent tests, newest first</caption>
           <thead className="text-sub">
             <tr>
-              <th scope="col" className="px-3 py-2 text-right font-normal">wpm</th>
-              <th scope="col" className="px-3 py-2 text-right font-normal">raw</th>
-              <th scope="col" className="px-3 py-2 text-right font-normal">accuracy</th>
-              <th scope="col" className="px-3 py-2 text-right font-normal">consistency</th>
-              <th scope="col" className="px-3 py-2 font-normal">test</th>
-              <th scope="col" className="px-3 py-2 text-right font-normal">date</th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">WPM</th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">Raw</th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">Accuracy</th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">Consistency</th>
+              <th scope="col" className="px-3 py-2 font-medium">Test</th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">Date</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.id} className="tabular-nums odd:bg-bg-alt">
+              <tr key={r.id} className="border-t border-line tabular-nums">
                 <td className="px-3 py-2 text-right text-main">
                   {r.isPb && (
-                    <span className="mr-2 text-xs" title="Personal best">
-                      <span aria-hidden="true">★</span>
+                    <span className="mr-2 inline-flex align-middle" title="Personal best">
+                      <StarIcon className="size-3.5" />
                       <span className="sr-only">personal best,</span>
                     </span>
                   )}
@@ -66,8 +67,9 @@ export function HistoryTable() {
                 <td className="px-3 py-2 text-sub">
                   {testLabel(r)}
                   {r.flagged && (
-                    <span className="ml-2 text-xs text-error" title="Failed verification; not counted for records">
-                      <span aria-hidden="true">⚑ </span>unverified
+                    <span className="ml-2 inline-flex items-center gap-1 text-xs text-error" title="Failed verification; not counted for records">
+                      <ShieldAlertIcon className="size-3.5" />
+                      Unverified
                     </span>
                   )}
                 </td>

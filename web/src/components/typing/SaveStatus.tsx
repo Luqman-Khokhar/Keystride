@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import type { ResultSubmission } from "@keystride/engine";
 import { errorMessage, useGetMeQuery, useSubmitResultMutation } from "@/store/api";
+import { AlertIcon, CheckIcon, ShieldAlertIcon } from "@/components/ui/icons";
 import { ShareActions } from "@/components/ui/ShareActions";
 import { buttonCls, linkCls, Spinner } from "@/components/ui/states";
 
@@ -44,8 +45,8 @@ export function SaveStatus({ submission }: SaveStatusProps) {
   else if (error) {
     content = (
       <p className="flex flex-wrap items-center justify-center gap-3 text-error">
-        <span>
-          <span aria-hidden="true">⚠ </span>
+        <span className="inline-flex items-center gap-1.5">
+          <AlertIcon className="size-4" />
           {errorMessage(error, "Couldn't save this result")}
         </span>
         <button type="button" onClick={retry} className={buttonCls}>
@@ -56,20 +57,21 @@ export function SaveStatus({ submission }: SaveStatusProps) {
   } else if (data) {
     content = data.counted ? (
       <div className="flex flex-col items-center gap-3">
-        <p className="text-sub">
-          <span aria-hidden="true">✓ </span>Saved
-          {data.isPb && <span className="ml-3 rounded bg-main px-2 py-0.5 text-bg">new personal best!</span>}
+        <p className="flex items-center gap-1.5 text-sub">
+          <CheckIcon className="size-4" />
+          Saved
+          {data.isPb && <span className="ml-2 rounded-full bg-main-soft px-2.5 py-0.5 font-medium text-main">New personal best</span>}
         </p>
         <ShareActions
           path={`/r/${data.id}`}
           title={`${Math.round(data.wpm)} WPM on Keystride`}
           text={`I typed ${Math.round(data.wpm)} WPM with ${Math.round(data.accuracy)}% accuracy on Keystride. Can you beat it?`}
-          copyLabel="copy result link"
+          copyLabel="Copy result link"
         />
       </div>
     ) : (
-      <p className="text-sub">
-        <span aria-hidden="true">⚑ </span>
+      <p className="flex items-center gap-1.5 text-sub">
+        <ShieldAlertIcon className="size-4" />
         Saved, but not counted for records: {data.flagReason}.
       </p>
     );

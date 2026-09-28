@@ -29,17 +29,17 @@ export default async function ResultPage({ params }: PageProps<"/r/[id]">) {
 
   const wpm = Math.round(r.wpm);
   const stats: [string, string, string?][] = [
-    ["raw", String(Math.round(r.rawWpm)), "Speed counting every typed character"],
-    ["consistency", `${Math.round(r.consistency)}%`, "How steady the speed was"],
-    ["characters", `${r.chars.correct}/${r.chars.incorrect}/${r.chars.extra}/${r.chars.missed}`, "correct / incorrect / extra / missed"],
-    ["time", `${(r.durationMs / 1000).toFixed(r.durationMs % 1000 ? 1 : 0)}s`],
+    ["Raw", String(Math.round(r.rawWpm)), "Speed counting every typed character"],
+    ["Consistency", `${Math.round(r.consistency)}%`, "How steady the speed was"],
+    ["Characters", `${r.chars.correct}/${r.chars.incorrect}/${r.chars.extra}/${r.chars.missed}`, "correct / incorrect / extra / missed"],
+    ["Time", `${(r.durationMs / 1000).toFixed(r.durationMs % 1000 ? 1 : 0)}s`],
   ];
 
   return (
     <main className="flex flex-1 flex-col items-center py-10">
       <article className="flex w-full max-w-4xl flex-col gap-8">
         <header className="flex flex-col gap-1">
-          <h1 className="text-2xl text-text">
+          <h1 className="text-2xl font-semibold tracking-tight text-text">
             <Link href={`/u/${r.username}`} className="text-main hover:underline focus-visible:outline-2 focus-visible:outline-main">
               {r.username}
             </Link>
@@ -47,7 +47,7 @@ export default async function ResultPage({ params }: PageProps<"/r/[id]">) {
           </h1>
           <p className="text-sm text-sub">
             {testLabel(r)} · {r.language} · {formatDate(r.createdAt)}
-            {r.isPb && <span className="ml-2 rounded bg-main px-2 py-0.5 text-xs text-bg">personal best</span>}
+            {r.isPb && <span className="ml-2 rounded-full bg-main-soft px-2.5 py-0.5 text-xs font-medium text-main">Personal best</span>}
             {r.competitionSlug && (
               <>
                 {" · "}
@@ -62,12 +62,12 @@ export default async function ResultPage({ params }: PageProps<"/r/[id]">) {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[auto_1fr] md:items-center">
           <dl className="flex gap-8 md:flex-col md:gap-4">
             <div>
-              <dt className="text-2xl text-sub">wpm</dt>
-              <dd className="text-6xl leading-none text-main">{wpm}</dd>
+              <dt className="text-lg font-medium text-sub">WPM</dt>
+              <dd className="font-mono text-6xl leading-none text-main">{wpm}</dd>
             </div>
             <div>
-              <dt className="text-2xl text-sub">acc</dt>
-              <dd className="text-6xl leading-none text-main">{Math.round(r.accuracy)}%</dd>
+              <dt className="text-lg font-medium text-sub">Accuracy</dt>
+              <dd className="font-mono text-6xl leading-none text-main">{Math.round(r.accuracy)}%</dd>
             </div>
           </dl>
           {r.samples.length > 0 && <ResultChart samples={r.samples} />}
@@ -77,12 +77,12 @@ export default async function ResultPage({ params }: PageProps<"/r/[id]">) {
           {stats.map(([label, value, hint]) => (
             <div key={label} title={hint}>
               <dt className="text-sm text-sub">{label}</dt>
-              <dd className="text-2xl text-main">{value}</dd>
+              <dd className="font-mono text-2xl text-text">{value}</dd>
             </div>
           ))}
         </dl>
 
-        <div className="flex flex-col items-center gap-4 border-t border-sub-alt pt-8">
+        <div className="flex flex-col items-center gap-4 border-t border-line pt-8">
           <Link href={presetPathFor(r)} className={primaryButtonCls}>
             Beat {wpm} wpm — take this test
           </Link>

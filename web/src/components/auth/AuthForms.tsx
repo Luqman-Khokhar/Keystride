@@ -4,14 +4,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { safeNext } from "@/lib/format";
 import { errorMessage, fieldErrors, useGetMeQuery, useLoginMutation, useRegisterMutation } from "@/store/api";
+import { AlertIcon } from "@/components/ui/icons";
 import { primaryButtonCls } from "@/components/ui/states";
 import { Field } from "./Field";
 
 function FormError({ message }: { message: string | null }) {
   if (!message) return null;
   return (
-    <p role="alert" className="text-sm text-error">
-      <span aria-hidden="true">⚠ </span>
+    <p role="alert" className="flex items-center gap-1.5 text-sm text-error">
+      <AlertIcon className="size-4" />
       {message}
     </p>
   );
@@ -41,8 +42,8 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4" aria-labelledby="register-title">
-      <h2 id="register-title" className="text-xl text-text">
-        create account
+      <h2 id="register-title" className="text-xl font-semibold tracking-tight text-text">
+        Create account
       </h2>
       <Field label="Username" name="username" autoComplete="username" required minLength={3} maxLength={20}
         value={values.username} onChange={set("username")} error={fields.username} hint="3–20 letters, numbers or _" />
@@ -76,8 +77,8 @@ function LoginForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4" aria-labelledby="login-title">
-      <h2 id="login-title" className="text-xl text-text">
-        sign in
+      <h2 id="login-title" className="text-xl font-semibold tracking-tight text-text">
+        Sign in
       </h2>
       <Field label="Email or username" name="identifier" autoComplete="username" required
         value={identifier} onChange={(e) => setIdentifier(e.target.value)} error={fields.identifier} />

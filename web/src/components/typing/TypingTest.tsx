@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 import { loadConfig, saveConfig } from "@/lib/engine/config";
 import { TypingSession } from "@/lib/engine/session";
 import type { TestConfig } from "@/lib/engine/types";
+import { RestartIcon } from "@/components/ui/icons";
 import { ConfigBar } from "./ConfigBar";
 import { LiveCounter } from "./LiveCounter";
 import { Results } from "./Results";
@@ -64,12 +65,9 @@ export default function TypingTest({ initialConfig }: TypingTestProps) {
         type="button"
         onClick={onRestartClick}
         aria-label="Restart test"
-        className="rounded-lg p-3 text-sub transition-colors hover:text-text focus-visible:text-text focus-visible:outline-2 focus-visible:outline-main active:opacity-70"
+        className="rounded-control p-3 text-sub transition-colors duration-150 hover:bg-surface hover:text-text focus-visible:text-text focus-visible:outline-2 focus-visible:outline-main active:bg-bg-alt"
       >
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 12a9 9 0 1 0 3-6.7" />
-          <path d="M3 4v5h5" />
-        </svg>
+        <RestartIcon />
       </button>
     </div>
   );

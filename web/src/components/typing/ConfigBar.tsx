@@ -28,7 +28,7 @@ function Toggle({
       type="button"
       aria-pressed={pressed}
       onClick={onClick}
-      className={`rounded px-2 py-1 transition-colors hover:text-text focus-visible:outline-2 focus-visible:outline-main active:opacity-70 disabled:opacity-40 ${
+      className={`rounded-control px-2 py-1 transition-colors duration-150 hover:text-text focus-visible:outline-2 focus-visible:outline-main active:translate-y-px disabled:opacity-40 motion-reduce:active:translate-y-0 ${
         pressed ? "text-main" : "text-sub"
       }`}
     >
@@ -52,7 +52,7 @@ export const ConfigBar = memo(function ConfigBar({ config, onChange, dimmed }: C
   return (
     <nav
       aria-label="Test settings"
-      className={`flex max-w-full flex-wrap items-center justify-center gap-y-1 rounded-lg bg-bg-alt px-2 py-1 text-sm transition-opacity duration-300 ${
+      className={`flex max-w-full flex-wrap items-center justify-center gap-y-1 rounded-surface bg-bg-alt px-2 py-1 font-mono text-sm transition-opacity duration-300 ${
         dimmed ? "opacity-0 focus-within:opacity-100 hover:opacity-100" : ""
       }`}
     >

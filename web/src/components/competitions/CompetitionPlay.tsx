@@ -6,6 +6,7 @@ import { TypingSession } from "@/lib/engine/session";
 import { LiveCounter } from "@/components/typing/LiveCounter";
 import { Results } from "@/components/typing/Results";
 import { TypingArea } from "@/components/typing/TypingArea";
+import { RestartIcon } from "@/components/ui/icons";
 import { AttemptStatus } from "./AttemptStatus";
 
 interface CompetitionPlayProps {
@@ -35,7 +36,7 @@ export default function CompetitionPlay({ slug, config, words, canRetry }: Compe
 
   if (done) {
     return (
-      <p className="rounded-lg bg-bg-alt px-6 py-10 text-center text-sub">
+      <p className="rounded-surface border border-line px-6 py-10 text-center text-sub">
         You&apos;ve used all your attempts. Your best score is in the standings.
       </p>
     );
@@ -63,12 +64,9 @@ export default function CompetitionPlay({ slug, config, words, canRetry }: Compe
         type="button"
         onClick={restart}
         aria-label="Restart attempt"
-        className="rounded-lg p-3 text-sub transition-colors hover:text-text focus-visible:text-text focus-visible:outline-2 focus-visible:outline-main active:opacity-70"
+        className="rounded-control p-3 text-sub transition-colors duration-150 hover:bg-surface hover:text-text focus-visible:text-text focus-visible:outline-2 focus-visible:outline-main active:bg-bg-alt"
       >
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 12a9 9 0 1 0 3-6.7" />
-          <path d="M3 4v5h5" />
-        </svg>
+        <RestartIcon />
       </button>
     </div>
   );

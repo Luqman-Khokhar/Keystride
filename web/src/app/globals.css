@@ -21,6 +21,20 @@
   --word-gap-y: 0.5rem;
   --word-gap-x: 0.6em;
 
+  /*
+   * Derived surface tokens. Computed from the active theme's --bg / --text /
+   * --main (themes set those inline on <html>), so every theme gets them.
+   */
+  --line: color-mix(in oklab, var(--text) 13%, var(--bg));
+  --line-strong: color-mix(in oklab, var(--text) 40%, var(--bg));
+  --surface: color-mix(in oklab, var(--text) 4%, var(--bg));
+  --main-soft: color-mix(in oklab, var(--main) 15%, var(--bg));
+
+  /* Motion. */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+
   color-scheme: dark;
 }
 
@@ -69,8 +83,18 @@
   --color-caret: var(--caret);
   --color-error: var(--error);
   --color-error-extra: var(--error-extra);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-surface: var(--surface);
+  --color-main-soft: var(--main-soft);
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
-  --font-sans: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme {
+  --radius-control: 0.375rem;
+  --radius-surface: 0.75rem;
+  --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 body {

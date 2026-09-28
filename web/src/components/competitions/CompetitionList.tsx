@@ -5,10 +5,13 @@ import { useState } from "react";
 import { errorMessage, useGetCompetitionsInfiniteQuery, useGetMeQuery } from "@/store/api";
 import type { CompetitionStatus } from "@/store/types";
 import { buttonCls, EmptyState, ErrorState, linkCls, primaryButtonCls, Skeleton, Spinner } from "@/components/ui/states";
+import { PlusIcon } from "@/components/ui/icons";
 import { CompetitionCard } from "./CompetitionCard";
 import { useServerClock } from "./useServerClock";
 
 type Tab = CompetitionStatus | "mine";
+
+const TAB_LABEL: Record<Tab, string> = { live: "Live", upcoming: "Upcoming", ended: "Ended", mine: "Mine" };
 
 const EMPTY: Record<Tab, string> = {
   live: "No public competitions are running right now.",
@@ -30,26 +33,27 @@ export function CompetitionList() {
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl text-text">competitions</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-text">Competitions</h1>
           <p className="text-sm text-sub">Race friends on the same text. Best verified score wins.</p>
         </div>
         <Link href={user ? "/competitions/new" : "/login?next=/competitions/new"} className={primaryButtonCls}>
-          + create competition
+          <PlusIcon className="size-4" />
+          Create competition
         </Link>
       </div>
 
-      <div role="group" aria-label="Filter competitions" className="flex w-fit max-w-full flex-wrap gap-1 rounded-lg bg-bg-alt p-1">
+      <div role="group" aria-label="Filter competitions" className="flex w-fit max-w-full flex-wrap gap-1 rounded-surface bg-bg-alt p-1">
         {tabs.map((t) => (
           <button
             key={t}
             type="button"
             aria-pressed={tab === t}
             onClick={() => setTab(t)}
-            className={`rounded-md px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-main active:opacity-70 ${
-              tab === t ? "bg-main text-bg" : "text-sub hover:text-text"
+            className={`rounded-control px-3 py-1.5 text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-main ${
+              tab === t ? "bg-bg font-medium text-text shadow-sm" : "text-sub hover:text-text"
             }`}
           >
-            {t}
+            {TAB_LABEL[t]}
           </button>
         ))}
       </div>

@@ -17,34 +17,34 @@ export function LeaderboardView() {
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl text-text">leaderboard</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-text">Leaderboard</h1>
           <p className="text-sm text-sub">English · no punctuation or numbers · verified results · best per person</p>
         </div>
-        <div role="group" aria-label="Test length" className="flex gap-1 rounded-lg bg-bg-alt p-1">
+        <div role="group" aria-label="Test length" className="flex gap-1 rounded-surface bg-bg-alt p-1">
           {AMOUNTS.map((a) => (
             <button
               key={a}
               type="button"
               aria-pressed={amount === a}
               onClick={() => setAmount(a)}
-              className={`rounded-md px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-main active:opacity-70 ${
-                amount === a ? "bg-main text-bg" : "text-sub hover:text-text"
+              className={`rounded-control px-3 py-1.5 text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-main ${
+                amount === a ? "bg-bg font-medium text-text shadow-sm" : "text-sub hover:text-text"
               }`}
             >
-              time {a}
+              {a} seconds
             </button>
           ))}
         </div>
       </div>
 
       {data?.me && (
-        <p className="rounded-lg bg-bg-alt px-4 py-3 text-sm text-sub">
+        <p className="rounded-surface bg-main-soft px-4 py-3 text-sm text-text">
           Your rank: <span className="text-main">#{data.me.rank}</span> with{" "}
           <span className="text-main">{Math.round(data.me.wpm)} wpm</span>
         </p>
       )}
       {data && !data.me && me && (
-        <p className="rounded-lg bg-bg-alt px-4 py-3 text-sm text-sub">
+        <p className="text-sm text-sub">
           You&apos;re not ranked on time {amount} yet.{" "}
           <Link href="/" className={linkCls}>
             Take a test
@@ -74,13 +74,13 @@ export function LeaderboardView() {
             <caption className="sr-only">Top {data.entries.length} for time {amount}</caption>
             <thead className="text-sub">
               <tr>
-                <th scope="col" className="px-3 py-2 font-normal">#</th>
-                <th scope="col" className="px-3 py-2 font-normal">name</th>
-                <th scope="col" className="px-3 py-2 text-right font-normal">wpm</th>
-                <th scope="col" className="px-3 py-2 text-right font-normal">accuracy</th>
-                <th scope="col" className="px-3 py-2 text-right font-normal">raw</th>
-                <th scope="col" className="px-3 py-2 text-right font-normal">consistency</th>
-                <th scope="col" className="px-3 py-2 text-right font-normal">date</th>
+                <th scope="col" className="px-3 py-2 font-medium">#</th>
+                <th scope="col" className="px-3 py-2 font-medium">Name</th>
+                <th scope="col" className="px-3 py-2 text-right font-medium">WPM</th>
+                <th scope="col" className="px-3 py-2 text-right font-medium">Accuracy</th>
+                <th scope="col" className="px-3 py-2 text-right font-medium">Raw</th>
+                <th scope="col" className="px-3 py-2 text-right font-medium">Consistency</th>
+                <th scope="col" className="px-3 py-2 text-right font-medium">Date</th>
               </tr>
             </thead>
             <tbody>
@@ -90,7 +90,7 @@ export function LeaderboardView() {
                   <tr
                     key={e.username}
                     aria-current={isMe ? "true" : undefined}
-                    className={`tabular-nums odd:bg-bg-alt ${isMe ? "outline-2 -outline-offset-2 outline-main" : ""}`}
+                    className={`border-t border-line tabular-nums ${isMe ? "bg-main-soft" : ""}`}
                   >
                     <td className="px-3 py-2 text-sub">
                       {e.rank <= 3 ? <span className="text-main">{e.rank}</span> : e.rank}
