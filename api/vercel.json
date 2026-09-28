@@ -1,7 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nextjs",
+  "framework": "express",
   "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm run build",
   "regions": ["fra1"],
   "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ../packages ../pnpm-lock.yaml ../pnpm-workspace.yaml"
 }
