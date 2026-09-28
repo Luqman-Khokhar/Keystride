@@ -3,6 +3,10 @@ packages:
   - api
   - packages/*
 
+# Real directories instead of symlinks: Vercel's function packaging copies symlinked
+# packages without their pnpm-sibling dependencies, which crashes the API at runtime.
+nodeLinker: hoisted
+
 allowBuilds:
   esbuild: true
   sharp: false
