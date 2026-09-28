@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import type { ResultSubmission } from "@keystride/engine";
 import { errorMessage, useGetMeQuery, useSubmitResultMutation } from "@/store/api";
-import { AlertIcon, CheckIcon, ShieldAlertIcon } from "@/components/ui/icons";
+import { AlertIcon, CheckIcon, ShieldAlertIcon, StarIcon } from "@/components/ui/icons";
 import { ShareActions } from "@/components/ui/ShareActions";
 import { buttonCls, linkCls, Spinner } from "@/components/ui/states";
 
@@ -56,11 +56,16 @@ export function SaveStatus({ submission }: SaveStatusProps) {
     );
   } else if (data) {
     content = data.counted ? (
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex w-full flex-col items-center gap-3">
+        {data.isPb && (
+          <p className="flex w-full items-center justify-center gap-2 rounded-surface bg-main-soft px-4 py-3 text-base font-medium text-main">
+            <StarIcon className="size-5" />
+            New personal best: {Math.round(data.wpm)} wpm
+          </p>
+        )}
         <p className="flex items-center gap-1.5 text-sub">
           <CheckIcon className="size-4" />
-          Saved
-          {data.isPb && <span className="ml-2 rounded-full bg-main-soft px-2.5 py-0.5 font-medium text-main">New personal best</span>}
+          Saved to your history
         </p>
         <ShareActions
           path={`/r/${data.id}`}

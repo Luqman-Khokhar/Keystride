@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { ResultSubmission } from "@keystride/engine";
 import { errorMessage, useSubmitAttemptMutation } from "@/store/api";
-import { AlertIcon, CheckIcon, ShieldAlertIcon } from "@/components/ui/icons";
+import { AlertIcon, CheckIcon, ShieldAlertIcon, StarIcon } from "@/components/ui/icons";
 import { ShareActions } from "@/components/ui/ShareActions";
 import { buttonCls, Spinner } from "@/components/ui/states";
 
@@ -44,13 +44,18 @@ export function AttemptStatus({ slug, submission }: { slug: string; submission: 
     const left =
       data.attemptsLeft === null ? null : `${data.attemptsLeft} attempt${data.attemptsLeft === 1 ? "" : "s"} left`;
     content = data.counted ? (
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex w-full flex-col items-center gap-3">
+        {data.improved && (
+          <p className="flex w-full items-center justify-center gap-2 rounded-surface bg-main-soft px-4 py-3 text-base font-medium text-main">
+            <StarIcon className="size-5" />
+            New best in this competition: {Math.round(data.wpm)} wpm
+          </p>
+        )}
         <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sub">
           <span className="inline-flex items-center gap-1.5">
             <CheckIcon className="size-4" />
             Counted
           </span>
-          {data.improved && <span className="rounded-full bg-main-soft px-2.5 py-0.5 font-medium text-main">New best in this competition</span>}
           {data.rank !== null && (
             <span>
               You&apos;re <span className="text-main">#{data.rank}</span> with {Math.round(data.best ?? 0)} wpm
