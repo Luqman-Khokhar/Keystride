@@ -11,6 +11,19 @@ import type {
   User,
 } from "./types";
 
+/** Put the signed-in user straight into the getMe cache so the header updates instantly. */
+async function setMeOnSuccess(
+  _arg: unknown,
+  { dispatch, queryFulfilled }: { dispatch: (action: unknown) => unknown; queryFulfilled: Promise<{ data: User }> },
+) {
+  try {
+    const { data: user } = await queryFulfilled;
+    dispatch(api.util.upsertQueryData("getMe", undefined, user));
+  } catch {
+    // Failed sign-in: the form shows the error; nothing to cache.
+  }
+}
+
 /** Same-origin: Next.js proxies /api/* to the Express server. */
 export const api = createApi({
   reducerPath: "api",
@@ -26,12 +39,14 @@ export const api = createApi({
     register: b.mutation<User, { email: string; username: string; password: string }>({
       query: (body) => ({ url: "/auth/register", method: "POST", body }),
       transformResponse: (r: { user: User }) => r.user,
-      invalidatesTags: ["Me", "History", "Summary", "Leaderboard"],
+      onQueryStarted: setMeOnSuccess,
+      invalidatesTags: ["History", "Summary", "Leaderboard"],
     }),
     login: b.mutation<User, { identifier: string; password: string }>({
       query: (body) => ({ url: "/auth/login", method: "POST", body }),
       transformResponse: (r: { user: User }) => r.user,
-      invalidatesTags: ["Me", "History", "Summary", "Leaderboard"],
+      onQueryStarted: setMeOnSuccess,
+      invalidatesTags: ["History", "Summary", "Leaderboard"],
     }),
     logout: b.mutation<void, void>({
       query: () => ({ url: "/auth/logout", method: "POST", body: {} }),
