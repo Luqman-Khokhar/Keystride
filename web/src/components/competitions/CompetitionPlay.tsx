@@ -5,8 +5,9 @@ import type { TestConfig } from "@keystride/engine";
 import { TypingSession } from "@/lib/engine/session";
 import { LiveCounter } from "@/components/typing/LiveCounter";
 import { Results } from "@/components/typing/Results";
+import { RestartButton } from "@/components/typing/RestartButton";
 import { TypingArea } from "@/components/typing/TypingArea";
-import { RestartIcon } from "@/components/ui/icons";
+import { useFocusMode } from "@/components/typing/useFocusMode";
 import { AttemptStatus } from "./AttemptStatus";
 
 interface CompetitionPlayProps {
@@ -24,6 +25,7 @@ export default function CompetitionPlay({ slug, config, words, canRetry }: Compe
   const phase = useSyncExternalStore(session.subscribe, session.getPhase, session.getPhase);
   const inputRef = useRef<HTMLInputElement>(null);
   const [done, setDone] = useState(false);
+  useFocusMode(phase);
 
   const restart = useCallback(() => {
     if (inputRef.current) inputRef.current.value = "";
@@ -60,14 +62,7 @@ export default function CompetitionPlay({ slug, config, words, canRetry }: Compe
         <LiveCounter session={session} />
         <TypingArea session={session} inputRef={inputRef} />
       </div>
-      <button
-        type="button"
-        onClick={restart}
-        aria-label="Restart attempt"
-        className="rounded-control p-3 text-sub transition-colors duration-150 hover:bg-surface hover:text-text focus-visible:text-text focus-visible:outline-2 focus-visible:outline-main active:bg-bg-alt"
-      >
-        <RestartIcon />
-      </button>
+      <RestartButton onClick={restart} label="Restart attempt" />
     </div>
   );
 }

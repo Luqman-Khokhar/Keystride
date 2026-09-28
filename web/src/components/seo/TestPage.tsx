@@ -18,15 +18,6 @@ export function TestPage({ h1, showHeading = false, config, intro, slug }: TestP
       <div className="flex min-h-[75dvh] flex-col justify-center gap-6 py-10">
         <h1 className={showHeading ? "text-center text-lg font-medium text-sub" : "sr-only"}>{h1}</h1>
         <TypingTestLoader initialConfig={config} />
-        <p className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-sub">
-          <span>
-            <kbd className="rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-text">tab</kbd> +{" "}
-            <kbd className="rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-text">enter</kbd> Restart test
-          </span>
-          <span>
-            <kbd className="rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-text">space</kbd> Next word
-          </span>
-        </p>
       </div>
       <TestGuide intro={intro} currentSlug={slug} />
     </main>

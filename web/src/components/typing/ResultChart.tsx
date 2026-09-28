@@ -130,15 +130,15 @@ export function ResultChart({ samples }: ResultChartProps) {
               ) : null,
             )}
 
-            <path d={geo.path("raw")} fill="none" className="stroke-sub" strokeWidth={2} strokeDasharray="4 4" strokeLinejoin="round" />
-            <path d={geo.path("wpm")} fill="none" className="stroke-main" strokeWidth={2.5} strokeLinejoin="round" />
+            <path d={geo.path("raw")} fill="none" className="chart-fade stroke-sub" strokeWidth={2} strokeDasharray="4 4" strokeLinejoin="round" />
+            <path d={geo.path("wpm")} pathLength={1} fill="none" className="chart-draw stroke-main" strokeWidth={2.5} strokeLinejoin="round" />
 
             {samples.map((s, i) =>
               s.errors > 0 ? (
                 <path
                   key={`e${s.second}`}
                   d={`M${geo.x(i) - 3},${geo.yErr(s.errors) - 3}l6,6m0,-6l-6,6`}
-                  className="stroke-error"
+                  className="chart-fade stroke-error"
                   strokeWidth={1.75}
                   strokeLinecap="round"
                 />

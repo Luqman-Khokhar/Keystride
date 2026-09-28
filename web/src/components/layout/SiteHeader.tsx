@@ -8,7 +8,7 @@ const navCls =
 
 export function SiteHeader() {
   return (
-    <header className="flex items-center gap-2">
+    <header className="focus-fade flex items-center gap-2">
       <Link
         href="/"
         className="flex items-center gap-2 rounded-control focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-main"
