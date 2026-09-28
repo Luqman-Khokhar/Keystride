@@ -19,7 +19,7 @@ function TypingTestSkeleton() {
           ))}
         </div>
       </div>
-      <div className="size-11" />
+      <div className="h-9" />
     </div>
   );
 }
