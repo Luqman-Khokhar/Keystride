@@ -6,6 +6,27 @@ const dateTimeFmt = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", ti
 export const formatDate = (iso: string) => dateFmt.format(new Date(iso));
 export const formatDateTime = (iso: string) => dateTimeFmt.format(new Date(iso));
 
+const relFmt = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+const REL_STEPS: [Intl.RelativeTimeFormatUnit, number][] = [
+  ["second", 60],
+  ["minute", 60],
+  ["hour", 24],
+  ["day", 7],
+  ["week", 4.35],
+  ["month", 12],
+  ["year", Infinity],
+];
+
+/** "3 minutes ago", "yesterday", "2 weeks ago". */
+export function formatRelative(iso: string, nowMs = Date.now()): string {
+  let v = (Date.parse(iso) - nowMs) / 1000;
+  for (const [unit, size] of REL_STEPS) {
+    if (Math.abs(v) < size) return relFmt.format(Math.round(v), unit);
+    v /= size;
+  }
+  return formatDate(iso);
+}
+
 export function formatDuration(ms: number): string {
   const s = Math.round(ms / 1000);
   const h = Math.floor(s / 3600);

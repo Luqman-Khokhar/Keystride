@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { formatDateTime, testLabel } from "@/lib/format";
+import { formatDateTime, formatRelative, testLabel } from "@/lib/format";
 import { errorMessage, useGetHistoryInfiniteQuery } from "@/store/api";
 import { ShieldAlertIcon, StarIcon } from "@/components/ui/icons";
 import { buttonCls, EmptyState, ErrorState, linkCls, Skeleton, Spinner } from "@/components/ui/states";
@@ -51,19 +51,19 @@ export function HistoryTable() {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.id} className="border-t border-line tabular-nums">
-                <td className="px-3 py-2 text-right text-main">
+              <tr key={r.id} className="border-t border-line tabular-nums transition-colors hover:bg-surface">
+                <td className="px-3 py-2 text-right font-mono text-text" title={`${r.wpm.toFixed(2)} wpm`}>
                   {r.isPb && (
-                    <span className="mr-2 inline-flex align-middle" title="Personal best">
+                    <span className="mr-2 inline-flex align-middle text-main" title="Personal best">
                       <StarIcon className="size-3.5" />
                       <span className="sr-only">personal best,</span>
                     </span>
                   )}
-                  {r.wpm.toFixed(2)}
+                  {Math.round(r.wpm)}
                 </td>
-                <td className="px-3 py-2 text-right">{r.rawWpm.toFixed(2)}</td>
-                <td className="px-3 py-2 text-right">{r.accuracy.toFixed(1)}%</td>
-                <td className="px-3 py-2 text-right">{r.consistency.toFixed(1)}%</td>
+                <td className="px-3 py-2 text-right text-sub">{Math.round(r.rawWpm)}</td>
+                <td className="px-3 py-2 text-right" title={`${r.accuracy.toFixed(1)}%`}>{Math.round(r.accuracy)}%</td>
+                <td className="px-3 py-2 text-right text-sub">{Math.round(r.consistency)}%</td>
                 <td className="px-3 py-2 text-sub">
                   {testLabel(r)}
                   {r.flagged && (
@@ -73,7 +73,11 @@ export function HistoryTable() {
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2 text-right text-sub">{formatDateTime(r.createdAt)}</td>
+                <td className="px-3 py-2 text-right text-sub">
+                  <time dateTime={r.createdAt} title={formatDateTime(r.createdAt)}>
+                    {formatRelative(r.createdAt)}
+                  </time>
+                </td>
               </tr>
             ))}
           </tbody>
