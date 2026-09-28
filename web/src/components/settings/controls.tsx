@@ -4,7 +4,7 @@ import { useId } from "react";
 import type { Theme } from "@/lib/settings/themes";
 
 const optionCls =
-  "block cursor-pointer rounded-md px-3 py-1.5 text-sm text-sub transition-colors hover:text-text peer-checked:bg-main peer-checked:text-bg peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-main peer-active:opacity-70 peer-disabled:cursor-not-allowed peer-disabled:opacity-40";
+  "block cursor-pointer rounded-md px-3 py-1.5 text-sm text-sub transition-colors hover:text-text peer-checked:bg-main peer-checked:text-bg peer-checked:hover:text-bg peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-main peer-active:opacity-70 peer-disabled:cursor-not-allowed peer-disabled:opacity-40";
 
 export function Row({
   title,
