@@ -1,12 +1,14 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { safeNext } from "@/lib/format";
 import { errorMessage, fieldErrors, useGetMeQuery, useLoginMutation, useRegisterMutation } from "@/store/api";
-import { AlertIcon } from "@/components/ui/icons";
-import { primaryButtonCls } from "@/components/ui/states";
+import { AlertIcon, LogoMark } from "@/components/ui/icons";
+import { linkCls, primaryButtonCls } from "@/components/ui/states";
 import { Field } from "./Field";
+
+type Mode = "login" | "register";
 
 function FormError({ message }: { message: string | null }) {
   if (!message) return null;
@@ -42,7 +44,7 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4" aria-labelledby="register-title">
-      <h2 id="register-title" className="text-xl font-semibold tracking-tight text-text">
+      <h2 id="register-title" className="sr-only">
         Create account
       </h2>
       <Field label="Username" name="username" autoComplete="username" required minLength={3} maxLength={20}
@@ -77,7 +79,7 @@ function LoginForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4" aria-labelledby="login-title">
-      <h2 id="login-title" className="text-xl font-semibold tracking-tight text-text">
+      <h2 id="login-title" className="sr-only">
         Sign in
       </h2>
       <Field label="Email or username" name="identifier" autoComplete="username" required
@@ -94,7 +96,9 @@ function LoginForm({ onDone }: { onDone: () => void }) {
 
 export function AuthForms() {
   const router = useRouter();
-  const next = safeNext(useSearchParams().get("next"));
+  const params = useSearchParams();
+  const pathname = usePathname();
+  const next = safeNext(params.get("next"));
   const { data: user } = useGetMeQuery();
 
   // Already signed in (or just signed in) → leave the page.
@@ -104,10 +108,57 @@ export function AuthForms() {
 
   const done = () => router.replace(next);
 
+  // Which form shows lives in the URL (?mode=register), so links and reloads keep it.
+  const mode: Mode = params.get("mode") === "register" ? "register" : "login";
+  const setMode = (m: Mode) => {
+    const q = new URLSearchParams(params.toString());
+    if (m === "register") q.set("mode", "register");
+    else q.delete("mode");
+    const qs = q.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
+
   return (
-    <div className="grid w-full max-w-4xl grid-cols-1 gap-12 md:grid-cols-2">
-      <LoginForm onDone={done} />
-      <RegisterForm onDone={done} />
+    <div className="flex w-full max-w-md flex-col gap-6">
+      <div className="flex flex-col items-center gap-3 text-center">
+        <LogoMark className="size-10 text-main" />
+        <div>
+          <p className="text-2xl font-semibold tracking-tight text-text">
+            {mode === "login" ? "Welcome back" : "Create your account"}
+          </p>
+          <p className="text-sm text-sub">
+            {mode === "login"
+              ? "Sign in to save results and join competitions."
+              : "Save every result, track personal bests and get on the leaderboard."}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-5 rounded-surface border border-line bg-surface p-6">
+        <div role="group" aria-label="Choose form" className="grid grid-cols-2 gap-1 rounded-surface bg-bg-alt p-1">
+          {(["login", "register"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              aria-pressed={mode === m}
+              onClick={() => setMode(m)}
+              className={`rounded-control px-3 py-1.5 text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-main ${
+                mode === m ? "bg-bg font-medium text-text shadow-sm" : "text-sub hover:text-text"
+              }`}
+            >
+              {m === "login" ? "Sign in" : "Create account"}
+            </button>
+          ))}
+        </div>
+        {mode === "login" ? <LoginForm onDone={done} /> : <RegisterForm onDone={done} />}
+      </div>
+
+      <p className="text-center text-sm text-sub">
+        {mode === "login" ? "New to Keystride? " : "Already have an account? "}
+        <button type="button" onClick={() => setMode(mode === "login" ? "register" : "login")} className={linkCls}>
+          {mode === "login" ? "Create an account" : "Sign in"}
+        </button>
+      </p>
     </div>
   );
 }
