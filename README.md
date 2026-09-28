@@ -36,19 +36,21 @@ Flagged results are stored but never count toward personal bests or leaderboards
 
 ## Deployment
 
-Pushing to `main` deploys automatically:
+Everything runs on Vercel (two projects from this repo) with MongoDB Atlas. Pushing to `main` deploys both.
 
-- **CI** (GitHub Actions, `.github/workflows/ci.yml`) — lint, typecheck, API tests, web build.
-- **API → Render** (`render.yaml` Blueprint, free plan) — redeploys only after CI passes and only when API code changes.
-- **Web → Vercel** (Hobby, root directory `web/`) — skips builds when only API code changed (`web/vercel.json`).
-- **Database → MongoDB Atlas** (free M0).
+- **CI** (GitHub Actions, `.github/workflows/ci.yml`) — lint, typecheck, API tests, API bundle, web build.
+- **Web → Vercel project** with root directory `web/` (`web/vercel.json`).
+- **API → Vercel project** with root directory `api/` (`api/vercel.json`). `pnpm --filter api build` bundles
+  `src/index.ts` (shared engine inlined) into `api/index.js`, which Vercel runs as one Express function.
+- **Database → MongoDB Atlas** (free M0, Frankfurt). Functions run in `fra1` next to it.
+- Each project skips builds when a commit doesn't touch its code.
 
-| Where | Variable | Value |
+| Project | Variable | Value |
 |---|---|---|
-| Render | `MONGODB_URI` | Atlas connection string (`…/keystride?retryWrites=true&w=majority`) |
-| Render | `COOKIE_SECURE`, `TRUST_PROXY` | set by `render.yaml` (`true`, `2`) |
-| Vercel | `API_URL` | `https://<your-render-service>.onrender.com` |
-| Vercel | `ENABLE_EXPERIMENTAL_COREPACK` | `1` (use the pinned pnpm version) |
+| API | `MONGODB_URI` | Atlas connection string (`…/keystride?retryWrites=true&w=majority`) |
+| API | `COOKIE_SECURE` | `true` |
+| API | `TRUST_PROXY` | `true` |
+| Web | `API_URL` | `https://<api-project>.vercel.app` (no trailing slash) |
+| both | `ENABLE_EXPERIMENTAL_COREPACK` | `1` (use the pinned pnpm version) |
 
-The free Render instance sleeps after 15 idle minutes; the first API call after that takes ~1 minute.
-The typing test itself runs entirely in the browser and is unaffected.
+Local development is unchanged: `pnpm dev` runs the API as a normal server (`api/src/dev.ts`).

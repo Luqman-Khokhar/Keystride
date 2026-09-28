@@ -1,6 +1,7 @@
 /**
  * How many proxy hops to trust for X-Forwarded-For (client IP → rate limits).
- * Local dev: the Next.js dev server on loopback. Production (Vercel → Render): 2 hops.
+ * Local dev: the Next.js dev server on loopback. Production on Vercel: "true" — Vercel's edge
+ * overwrites any client-sent X-Forwarded-For, so the left-most entry is the real visitor.
  */
 function trustProxy(raw: string | undefined): number | string {
   const v = raw?.trim();

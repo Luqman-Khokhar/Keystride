@@ -36,6 +36,9 @@ jobs:
       - name: API tests
         run: pnpm --filter api test
 
+      - name: Bundle API (Vercel function)
+        run: pnpm --filter api build
+
       - name: Build web
         run: pnpm --filter web build
         env:
