@@ -1,0 +1,41 @@
+import { TIME_OPTIONS, WORD_OPTIONS } from "@keystride/engine";
+import { formatDate } from "@/lib/format";
+import type { PersonalBest } from "@/store/types";
+
+/** Grid of standard (no punctuation/numbers) PBs for every test length, "–" when missing. */
+export function PersonalBests({ bests }: { bests: PersonalBest[] }) {
+  const standard = bests.filter((b) => !b.config.punctuation && !b.config.numbers);
+  const find = (mode: "time" | "words", amount: number) =>
+    standard.find((b) => b.config.mode === mode && b.config.amount === amount);
+
+  const groups = [
+    { mode: "time" as const, amounts: TIME_OPTIONS, unit: "seconds" },
+    { mode: "words" as const, amounts: WORD_OPTIONS, unit: "words" },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {groups.map((g) => (
+        <section key={g.mode} aria-labelledby={`pb-${g.mode}`} className="rounded-lg bg-bg-alt p-4">
+          <h3 id={`pb-${g.mode}`} className="mb-3 text-sm text-sub">
+            {g.mode} personal bests
+          </h3>
+          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {g.amounts.map((a) => {
+              const pb = find(g.mode, a);
+              return (
+                <div key={a} title={pb ? `${pb.wpm} wpm · ${pb.accuracy}% acc · ${formatDate(pb.createdAt)}` : undefined}>
+                  <dt className="text-xs text-sub">
+                    {a} <span className="sr-only">{g.unit}</span>
+                  </dt>
+                  <dd className="text-2xl tabular-nums text-main">{pb ? Math.round(pb.wpm) : "–"}</dd>
+                  <dd className="text-xs tabular-nums text-sub">{pb ? `${Math.round(pb.accuracy)}%` : "no result"}</dd>
+                </div>
+              );
+            })}
+          </dl>
+        </section>
+      ))}
+    </div>
+  );
+}
