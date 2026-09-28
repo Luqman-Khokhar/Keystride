@@ -7,11 +7,11 @@ export function ProfileStats({ joined, tests, timeMs }: { joined: string; tests:
     { label: "Time typing", value: formatDuration(timeMs) },
   ];
   return (
-    <dl className="flex flex-wrap gap-x-10 gap-y-3">
+    <dl className="grid grid-cols-3 divide-x divide-line rounded-surface border border-line">
       {items.map((i) => (
-        <div key={i.label}>
-          <dt className="text-xs text-sub">{i.label}</dt>
-          <dd className="text-lg tabular-nums text-text">{i.value}</dd>
+        <div key={i.label} className="min-w-0 px-4 py-3">
+          <dt className="truncate text-xs text-sub">{i.label}</dt>
+          <dd className="truncate text-lg font-medium tabular-nums text-text">{i.value}</dd>
         </div>
       ))}
     </dl>

@@ -12,6 +12,7 @@ import { buttonCls, ErrorState, ghostButtonCls, linkCls, primaryButtonCls, Skele
 import { HistoryTable } from "./HistoryTable";
 import { PersonalBests } from "./PersonalBests";
 import { ProfileStats } from "./ProfileStats";
+import { WpmTrend } from "./WpmTrend";
 
 function SummarySection() {
   const { data, error, isLoading, refetch } = useGetSummaryQuery();
@@ -58,9 +59,17 @@ export function AccountView() {
     <div className="flex w-full flex-col gap-10">
       <section aria-labelledby="account-title" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 id="account-title" className="text-3xl font-semibold tracking-tight text-text">
-            {user.username}
-          </h1>
+          <div className="flex min-w-0 items-center gap-3">
+            <span
+              aria-hidden="true"
+              className="flex size-12 shrink-0 items-center justify-center rounded-full bg-main-soft text-xl font-semibold text-main uppercase"
+            >
+              {user.username.charAt(0)}
+            </span>
+            <h1 id="account-title" className="truncate text-3xl font-semibold tracking-tight text-text">
+              {user.username}
+            </h1>
+          </div>
           <div className="flex gap-2">
             <Link href={`/u/${user.username}`} className={buttonCls}>
               Public profile
@@ -79,6 +88,7 @@ export function AccountView() {
           </div>
         </div>
         {summary && <ProfileStats joined={user.createdAt} tests={summary.tests} timeMs={summary.timeMs} />}
+        <WpmTrend />
       </section>
 
       <section aria-labelledby="pb-title" className="flex flex-col gap-4">

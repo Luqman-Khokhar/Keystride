@@ -87,8 +87,14 @@ function MainArea({ comp, status, nowMs }: { comp: CompetitionDetail; status: Co
   if (status === "upcoming") {
     return (
       <Panel>
-        <p className="text-sub">Starts in</p>
-        <p className="font-mono text-5xl tabular-nums text-main">{formatRemaining(Date.parse(comp.startsAt) - nowMs)}</p>
+        <p className="text-sm font-medium text-sub">Starts in</p>
+        <p
+          className={`font-mono text-6xl tabular-nums text-text sm:text-7xl ${
+            Date.parse(comp.startsAt) - nowMs <= 10_000 ? "animate-pulse text-main motion-reduce:animate-none" : ""
+          }`}
+        >
+          {formatRemaining(Date.parse(comp.startsAt) - nowMs)}
+        </p>
         <p className="max-w-md text-sm text-sub">
           The text is revealed when the competition starts, so everyone sees it at the same time.
           {joined && " You're in — come back when the timer hits zero."}

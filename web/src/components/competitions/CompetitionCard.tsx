@@ -21,7 +21,10 @@ export function CompetitionCard({ comp, nowMs }: { comp: CompetitionSummary; now
       >
         <div className="flex items-center justify-between gap-2">
           <StatusBadge status={status} />
-          <span className="text-xs tabular-nums text-sub">{timing}</span>
+          {/* Clock-derived text: server and client render a second apart. */}
+          <span className="text-xs tabular-nums text-sub" suppressHydrationWarning>
+            {timing}
+          </span>
         </div>
         <span className="line-clamp-2 text-lg font-medium break-words text-text">{comp.title}</span>
         <span className="mt-auto flex flex-wrap gap-x-3 gap-y-1 text-xs text-sub">
