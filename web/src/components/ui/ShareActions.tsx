@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { CheckIcon, LinkIcon, ShareIcon } from "./icons";
 import { buttonCls } from "./states";
 
 /** For use on bg-alt panels, where the default button surface would disappear. */
 const onPanelCls =
-  "inline-flex items-center justify-center gap-2 rounded-lg bg-sub-alt px-4 py-2 text-sm text-text transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main active:opacity-70";
+  "inline-flex items-center justify-center gap-2 rounded-control bg-sub-alt px-4 py-2 text-sm font-medium text-text transition-[opacity,transform] duration-150 hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main active:translate-y-px motion-reduce:active:translate-y-0";
 
 const noopSubscribe = () => () => {};
 
@@ -19,7 +20,7 @@ interface ShareActionsProps {
 }
 
 /** "Copy link" + native share sheet (when the device has one). */
-export function ShareActions({ path, title, text, copyLabel = "copy link", onPanel = false }: ShareActionsProps) {
+export function ShareActions({ path, title, text, copyLabel = "Copy link", onPanel = false }: ShareActionsProps) {
   const [copied, setCopied] = useState(false);
   const [manual, setManual] = useState<string | null>(null);
   const canShare = useSyncExternalStore(noopSubscribe, () => "share" in navigator, () => false);
@@ -41,7 +42,8 @@ export function ShareActions({ path, title, text, copyLabel = "copy link", onPan
   return (
     <div className={`flex flex-wrap items-center gap-2 ${onPanel ? "justify-start" : "justify-center"}`}>
       <button type="button" onClick={copy} className={cls}>
-        {copied ? "✓ link copied" : copyLabel}
+        {copied ? <CheckIcon className="size-4" /> : <LinkIcon className="size-4" />}
+        {copied ? "Link copied" : copyLabel}
       </button>
       {canShare && (
         <button
@@ -49,7 +51,8 @@ export function ShareActions({ path, title, text, copyLabel = "copy link", onPan
           onClick={() => navigator.share({ title, text, url: url() }).catch(() => {})}
           className={cls}
         >
-          share…
+          <ShareIcon className="size-4" />
+          Share…
         </button>
       )}
       {manual && (
@@ -59,7 +62,7 @@ export function ShareActions({ path, title, text, copyLabel = "copy link", onPan
           aria-label="Link to share"
           onFocus={(e) => e.currentTarget.select()}
           autoFocus
-          className="w-full rounded-lg bg-bg-alt px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-main"
+          className="w-full rounded-control border border-line-strong bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-main"
         />
       )}
       <span aria-live="polite" className="sr-only">

@@ -2,23 +2,29 @@
 
 import Link from "next/link";
 import { useGetMeQuery } from "@/store/api";
-import { Skeleton } from "@/components/ui/states";
+import { UserIcon } from "@/components/ui/icons";
 
 const navCls =
-  "flex items-center gap-2 rounded-lg p-2 text-sub transition-colors hover:text-text focus-visible:text-text focus-visible:outline-2 focus-visible:outline-main active:opacity-70";
+  "flex items-center gap-2 rounded-control px-2.5 py-2 text-sm text-sub transition-colors duration-150 hover:bg-surface hover:text-text focus-visible:text-text focus-visible:outline-2 focus-visible:outline-main active:bg-bg-alt";
 
 export function AccountLink() {
   const { data: user, isLoading } = useGetMeQuery();
 
-  if (isLoading) return <Skeleton className="h-9 w-24" />;
+  // While the session loads, hold the space with the signed-out link, invisible —
+  // no grey placeholder box in the header, no shift when it resolves.
+  if (isLoading) {
+    return (
+      <span aria-hidden="true" className={`${navCls} invisible`}>
+        <UserIcon className="size-4.5" />
+        <span className="max-sm:sr-only">Sign in</span>
+      </span>
+    );
+  }
 
   return (
     <Link href={user ? "/account" : "/login"} className={navCls}>
-      <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 21a8 8 0 0 1 16 0" />
-      </svg>
-      <span className="max-w-32 truncate text-sm max-sm:sr-only">{user ? user.username : "sign in"}</span>
+      <UserIcon className="size-4.5" />
+      <span className="max-w-32 truncate max-sm:sr-only">{user ? user.username : "Sign in"}</span>
     </Link>
   );
 }
