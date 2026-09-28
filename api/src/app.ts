@@ -14,8 +14,9 @@ export function createApp() {
   const app = express();
 
   app.disable("x-powered-by");
-  // The Next.js server proxies /api from localhost; trust its X-Forwarded-For for rate limits.
-  app.set("trust proxy", "loopback");
+  // Requests arrive via the Next.js proxy (and Render's load balancer in production);
+  // trust exactly those hops so req.ip is the visitor's IP for rate limiting.
+  app.set("trust proxy", config.trustProxy);
 
   if (config.corsOrigin?.length) {
     app.use(cors({ origin: config.corsOrigin, credentials: true }));
