@@ -4,6 +4,7 @@ import {
   KEY_SPACE,
   WORD_LISTS,
   computeResult,
+  coreWord,
   type Keystroke,
   type ResultSubmission,
   type TestResult,
@@ -25,8 +26,6 @@ export type Verdict =
   | { ok: false; error: string };
 
 const PUNCT = /^["(]?(.*?)(?:'s)?[.,?!;:]?[")]?$/;
-
-const coreWord = (w: string) => (PUNCT.exec(w)?.[1] ?? w).toLowerCase();
 
 /** Checks a displayed word could have come from the generator for this config. */
 function isValidWord(word: string, sub: ResultSubmission, list: ReadonlySet<string>): boolean {

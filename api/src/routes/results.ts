@@ -24,7 +24,7 @@ const submitLimiter = rateLimit({
 });
 
 export const RESULT_FIELDS =
-  "wpm rawWpm accuracy consistency chars mode amount punctuation numbers language durationMs isPb flagged createdAt";
+  "wpm rawWpm accuracy consistency chars mode amount punctuation numbers language durationMs isPb flagged competitionSlug createdAt";
 
 export function toDto(r: Record<string, unknown> & { _id: unknown }) {
   const { _id, ...rest } = r;
@@ -39,6 +39,7 @@ export function bestsPipeline(uid: Types.ObjectId, standardOnly = false): Pipeli
         userId: uid,
         flagged: false,
         deletedAt: null,
+        competitionId: null,
         ...(standardOnly ? { punctuation: false, numbers: false } : {}),
       },
     },
@@ -82,6 +83,7 @@ resultsRouter.post("/", requireAuth, submitLimiter, async (req, res) => {
   if (!flagReason) {
     const best = await ResultModel.findOne({
       userId: uid, mode, amount, punctuation, numbers, language, flagged: false, deletedAt: null,
+      competitionId: null,
     })
       .sort({ wpm: -1 })
       .select("wpm")

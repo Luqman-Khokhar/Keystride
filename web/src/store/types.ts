@@ -22,6 +22,7 @@ export interface SavedResult {
   durationMs: number;
   isPb: boolean;
   flagged: boolean;
+  competitionSlug: string | null;
   createdAt: string;
 }
 
@@ -79,4 +80,80 @@ export interface SubmitResponse {
 export interface ApiErrorBody {
   error?: string;
   details?: { fields?: Record<string, string> };
+}
+
+export type CompetitionStatus = "upcoming" | "live" | "ended";
+export type CompetitionVisibility = "public" | "unlisted";
+
+export interface CompetitionSummary {
+  slug: string;
+  title: string;
+  creator: string;
+  config: TestConfig;
+  visibility: CompetitionVisibility;
+  startsAt: string;
+  endsAt: string;
+  playerCount: number;
+  maxPlayers: number;
+  maxAttempts: number | null;
+  status: CompetitionStatus;
+}
+
+export interface CompetitionBest {
+  wpm: number;
+  rawWpm: number;
+  accuracy: number;
+  consistency: number;
+  at: string;
+}
+
+export interface CompetitionDetail extends CompetitionSummary {
+  description: string;
+  serverNow: string;
+  /** null until the competition starts. */
+  words: string[] | null;
+  me: { joined: boolean; isCreator: boolean; attempts: number; best: CompetitionBest | null } | null;
+}
+
+export interface CompetitionPage {
+  items: CompetitionSummary[];
+  nextCursor: string | null;
+}
+
+export interface StandingsEntry {
+  rank: number | null;
+  username: string;
+  attempts: number;
+  joinedAt: string;
+  best: CompetitionBest | null;
+}
+
+export interface Standings {
+  status: CompetitionStatus;
+  serverNow: string;
+  playerCount: number;
+  entries: StandingsEntry[];
+}
+
+export interface CreateCompetitionInput {
+  title: string;
+  description: string;
+  config: TestConfig;
+  visibility: CompetitionVisibility;
+  startsAt?: string;
+  durationMinutes: number;
+  maxPlayers: number;
+  maxAttempts: number | null;
+}
+
+export interface AttemptResponse {
+  wpm: number;
+  accuracy: number;
+  counted: boolean;
+  flagReason: string | null;
+  improved: boolean;
+  attempts: number;
+  attemptsLeft: number | null;
+  rank: number | null;
+  best: number | null;
 }

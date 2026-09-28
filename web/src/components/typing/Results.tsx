@@ -9,7 +9,11 @@ interface ResultsProps {
   result: TestResult;
   submission: ResultSubmission | null;
   onNext: () => void;
-  onRepeat: () => void;
+  /** Hidden when omitted. */
+  onRepeat?: () => void;
+  nextLabel?: string;
+  /** Replaces the default "save to history" status (e.g. competition attempts). */
+  saveStatus?: React.ReactNode;
 }
 
 function Stat({
@@ -31,7 +35,14 @@ function Stat({
   );
 }
 
-export function Results({ result, submission, onNext, onRepeat }: ResultsProps) {
+export function Results({
+  result,
+  submission,
+  onNext,
+  onRepeat,
+  nextLabel = "Next test",
+  saveStatus,
+}: ResultsProps) {
   const nextRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -89,15 +100,17 @@ export function Results({ result, submission, onNext, onRepeat }: ResultsProps) 
         <Stat label="time" value={`${(result.durationMs / 1000).toFixed(result.durationMs % 1000 ? 1 : 0)}s`} />
       </dl>
 
-      {submission && <SaveStatus submission={submission} />}
+      {saveStatus ?? (submission && <SaveStatus submission={submission} />)}
 
       <div className="flex flex-wrap justify-center gap-2">
         <button ref={nextRef} type="button" onClick={onNext} className={btn}>
-          Next test
+          {nextLabel}
         </button>
-        <button type="button" onClick={onRepeat} className={btn}>
-          Repeat test
-        </button>
+        {onRepeat && (
+          <button type="button" onClick={onRepeat} className={btn}>
+            Repeat test
+          </button>
+        )}
       </div>
     </section>
   );
