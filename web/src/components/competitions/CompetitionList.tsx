@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { errorMessage, useGetCompetitionsInfiniteQuery, useGetMeQuery } from "@/store/api";
-import type { CompetitionStatus } from "@/store/types";
+import type { CompetitionPage, CompetitionStatus } from "@/store/types";
 import { buttonCls, EmptyState, ErrorState, linkCls, primaryButtonCls, Skeleton, Spinner } from "@/components/ui/states";
 import { PlusIcon } from "@/components/ui/icons";
 import { CompetitionCard } from "./CompetitionCard";
@@ -20,13 +20,43 @@ const EMPTY: Record<Tab, string> = {
   mine: "You haven't created or joined a competition yet.",
 };
 
-export function CompetitionList() {
+const STEPS = [
+  ["Create", "Pick the test, when it starts and how long it stays open."],
+  ["Share", "Send the invite link. Everyone gets the same text."],
+  ["Race", "Each player's best verified attempt counts on the live standings."],
+] as const;
+
+function HowItWorks() {
+  return (
+    <ol className="grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="How competitions work">
+      {STEPS.map(([title, body], i) => (
+        <li key={title} className="flex gap-3 rounded-surface border border-line p-4">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-main-soft font-mono text-sm text-main">
+            {i + 1}
+          </span>
+          <span className="flex flex-col gap-0.5">
+            <span className="font-medium text-text">{title}</span>
+            <span className="text-sm text-sub">{body}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+interface CompetitionListProps {
+  /** Server-fetched first page of the "live" tab, shown until the client query lands. */
+  initial?: CompetitionPage | null;
+}
+
+export function CompetitionList({ initial }: CompetitionListProps) {
   const { data: user } = useGetMeQuery();
   const [tab, setTab] = useState<Tab>("live");
   const { data, error, isLoading, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
     useGetCompetitionsInfiniteQuery(tab);
   const nowMs = useServerClock(undefined);
-  const items = data?.pages.flatMap((p) => p.items) ?? [];
+  const serverItems = tab === "live" && !data ? initial?.items : undefined;
+  const items = data?.pages.flatMap((p) => p.items) ?? serverItems ?? [];
   const tabs: Tab[] = user ? ["live", "upcoming", "ended", "mine"] : ["live", "upcoming", "ended"];
 
   return (
@@ -58,7 +88,7 @@ export function CompetitionList() {
         ))}
       </div>
 
-      {isLoading || (isFetching && !isFetchingNextPage && !items.length) ? (
+      {!serverItems && (isLoading || (isFetching && !isFetchingNextPage && !items.length)) ? (
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Loading competitions">
           {Array.from({ length: 6 }, (_, i) => (
             <li key={i}>
@@ -66,23 +96,26 @@ export function CompetitionList() {
             </li>
           ))}
         </ul>
-      ) : error && !items.length ? (
+      ) : error && !items.length && !serverItems ? (
         <ErrorState message={errorMessage(error, "Couldn't load competitions")} onRetry={refetch} />
       ) : !items.length ? (
-        <EmptyState title={EMPTY[tab]}>
-          <Link href={user ? "/competitions/new" : "/login?next=/competitions/new"} className={linkCls}>
-            Create one
-          </Link>{" "}
-          and send the link to your friends.
-        </EmptyState>
+        <div className="flex flex-col gap-4">
+          <EmptyState title={EMPTY[tab]}>
+            <Link href={user ? "/competitions/new" : "/login?next=/competitions/new"} className={linkCls}>
+              Create one
+            </Link>{" "}
+            and send the link to your friends.
+          </EmptyState>
+          <HowItWorks />
+        </div>
       ) : (
         <>
-          <ul className={`grid grid-cols-1 gap-3 transition-opacity sm:grid-cols-2 lg:grid-cols-3 ${isFetching && !isFetchingNextPage ? "opacity-60" : ""}`}>
+          <ul className={`grid grid-cols-1 gap-3 transition-opacity sm:grid-cols-2 lg:grid-cols-3 ${data && isFetching && !isFetchingNextPage ? "opacity-60" : ""}`}>
             {items.map((c) => (
               <CompetitionCard key={c.slug} comp={c} nowMs={nowMs} />
             ))}
           </ul>
-          <div className="flex flex-col items-center gap-2 text-sm text-sub">
+          {data && <div className="flex flex-col items-center gap-2 text-sm text-sub">
             {hasNextPage ? (
               isFetchingNextPage ? (
                 <Spinner label="Loading more…" />
@@ -96,7 +129,7 @@ export function CompetitionList() {
                 Showing all {items.length} competition{items.length === 1 ? "" : "s"}.
               </p>
             )}
-          </div>
+          </div>}
         </>
       )}
     </div>
