@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CompetitionView } from "@/components/competitions/CompetitionView";
+import { openGraph } from "@/lib/seo";
 
 const API_URL = process.env.API_URL?.replace(/\/$/, "") || "http://localhost:4000";
 
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: PageProps<"/c/[slug]">): Prom
       title: c.title,
       description: `Join ${c.creator}'s typing competition on Keystride (${test}). Best verified score wins.`,
       robots: { index: false },
-      openGraph: { title: `${c.title} — typing competition`, description: `Hosted by ${c.creator} · ${test}` },
+      openGraph: openGraph({ title: `${c.title} — typing competition`, description: `Hosted by ${c.creator} · ${test}`, url: `/c/${slug}` }),
     };
   } catch {
     return fallback;
