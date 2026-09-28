@@ -99,7 +99,7 @@ export function ThemePicker({
 }) {
   const name = useId();
   return (
-    <fieldset className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <fieldset className="grid grid-cols-2 gap-2 sm:grid-cols-3">
       <legend className="sr-only">Theme</legend>
       {themes.map((t) => (
         <label key={t.id} className="cursor-pointer">
@@ -111,15 +111,21 @@ export function ThemePicker({
             onChange={() => onChange(t.id)}
             className="peer sr-only"
           />
+          {/* A real line of the test in that theme: typed, mistake, caret, untyped. */}
           <span
-            className="flex items-center justify-between gap-2 rounded-control border border-line px-3 py-2 text-sm capitalize outline-offset-2 transition-transform hover:-translate-y-0.5 peer-checked:outline-2 peer-checked:outline-main peer-focus-visible:outline-2 peer-focus-visible:outline-text motion-reduce:transition-none"
-            style={{ background: t.vars["--bg"], color: t.vars["--text"] }}
+            className="flex flex-col gap-2 rounded-control border border-line px-3 py-2.5 outline-offset-2 transition-transform duration-150 hover:-translate-y-0.5 peer-checked:outline-2 peer-checked:outline-main peer-focus-visible:outline-2 peer-focus-visible:outline-text motion-reduce:transition-none"
+            style={{ background: t.vars["--bg"] }}
           >
-            {t.name}
-            <span aria-hidden="true" className="flex gap-1">
-              <span className="size-2.5 rounded-full" style={{ background: t.vars["--main"] }} />
-              <span className="size-2.5 rounded-full" style={{ background: t.vars["--sub"] }} />
-              <span className="size-2.5 rounded-full" style={{ background: t.vars["--error"] }} />
+            <span className="flex items-center justify-between text-xs capitalize" style={{ color: t.vars["--sub"] }}>
+              {t.name}
+              <span aria-hidden="true" className="size-2 rounded-full" style={{ background: t.vars["--main"] }} />
+            </span>
+            <span aria-hidden="true" className="truncate font-mono text-sm">
+              <span style={{ color: t.vars["--text"] }}>quick b</span>
+              <span style={{ color: t.vars["--error"] }}>w</span>
+              <span style={{ color: t.vars["--text"] }}>o</span>
+              <span className="inline-block h-[1.1em] w-0.5 translate-y-0.5 align-baseline" style={{ background: t.vars["--caret"] }} />
+              <span style={{ color: t.vars["--sub"] }}>wn fox</span>
             </span>
           </span>
         </label>
