@@ -361,6 +361,7 @@ competitionsRouter.post("/:slug/attempts", requireAuth, attemptLimiter, async (r
   }
 
   res.status(201).json({
+    resultId: String(doc._id),
     wpm: result.wpm,
     accuracy: result.accuracy,
     counted: !flagReason,
