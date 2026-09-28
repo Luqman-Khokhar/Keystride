@@ -10,3 +10,6 @@ dist/
 # Local tooling files (kept out of the repo)
 web/AGENTS.md
 web/CLAUDE.md
+
+# API bundle for Vercel (built by `pnpm --filter api build`)
+api/index.js
