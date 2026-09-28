@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono } from "next/font/google";
+import { Geist, JetBrains_Mono } from "next/font/google";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SETTINGS_BOOT_SCRIPT } from "@/lib/settings/settings";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
@@ -8,6 +8,13 @@ import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+// UI text. Mono stays for the words being typed and for numbers.
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
   display: "swap",
 });
@@ -32,11 +39,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // Boot script sets theme vars + data attributes on <html> before paint.
-    <html lang="en" className={`${jetbrainsMono.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${geist.variable} ${jetbrainsMono.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: SETTINGS_BOOT_SCRIPT }} />
       </head>
-      <body className="flex min-h-full flex-col bg-bg font-mono text-text">
+      <body className="flex min-h-full flex-col bg-bg font-sans text-text">
         <StoreProvider>
           <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-6 sm:px-8">
             <SiteHeader />
