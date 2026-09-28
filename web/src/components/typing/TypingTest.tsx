@@ -9,8 +9,13 @@ import { LiveCounter } from "./LiveCounter";
 import { Results } from "./Results";
 import { TypingArea } from "./TypingArea";
 
-export default function TypingTest() {
-  const [config, setConfig] = useState<TestConfig>(loadConfig);
+interface TypingTestProps {
+  /** Landing pages open in their own mode instead of the visitor's saved one. */
+  initialConfig?: TestConfig;
+}
+
+export default function TypingTest({ initialConfig }: TypingTestProps) {
+  const [config, setConfig] = useState<TestConfig>(() => initialConfig ?? loadConfig());
   const [session, setSession] = useState(() => new TypingSession(config));
   const phase = useSyncExternalStore(session.subscribe, session.getPhase, session.getPhase);
   const inputRef = useRef<HTMLInputElement>(null);

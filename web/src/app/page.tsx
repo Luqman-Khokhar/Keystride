@@ -1,22 +1,29 @@
-import { TypingTestLoader } from "@/components/typing/TypingTestLoader";
+import type { Metadata } from "next";
+import { TestPage } from "@/components/seo/TestPage";
+import { jsonLd, SITE_NAME, SITE_URL } from "@/lib/site";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default function Home() {
   return (
     <>
-      <main className="flex flex-1 flex-col justify-center py-10">
-        <h1 className="sr-only">Typing speed test</h1>
-        <TypingTestLoader />
-      </main>
-
-      <footer className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-sub">
-        <span>
-          <kbd className="rounded bg-bg-alt px-1.5 py-0.5 text-text">tab</kbd> +{" "}
-          <kbd className="rounded bg-bg-alt px-1.5 py-0.5 text-text">enter</kbd> — restart test
-        </span>
-        <span>
-          <kbd className="rounded bg-bg-alt px-1.5 py-0.5 text-text">space</kbd> — next word
-        </span>
-      </footer>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLd({
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: SITE_NAME,
+          url: SITE_URL,
+          applicationCategory: "EducationalApplication",
+          operatingSystem: "Any",
+          description: "Free, minimal typing speed test with live WPM, accuracy, themes, a verified leaderboard and typing competitions.",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+        })}
+      />
+      <TestPage
+        h1="Typing speed test"
+        intro="Keystride is a free typing speed test. Pick a time (15 to 120 seconds) or a word count (10 to 100), add punctuation or numbers if you like, and start typing. Your settings are remembered on this device."
+      />
     </>
   );
 }
