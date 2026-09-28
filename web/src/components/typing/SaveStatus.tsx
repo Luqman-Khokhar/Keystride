@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import type { ResultSubmission } from "@keystride/engine";
 import { errorMessage, useGetMeQuery, useSubmitResultMutation } from "@/store/api";
+import { ShareActions } from "@/components/ui/ShareActions";
 import { buttonCls, linkCls, Spinner } from "@/components/ui/states";
 
 interface SaveStatusProps {
@@ -54,10 +55,18 @@ export function SaveStatus({ submission }: SaveStatusProps) {
     );
   } else if (data) {
     content = data.counted ? (
-      <p className="text-sub">
-        <span aria-hidden="true">✓ </span>Saved
-        {data.isPb && <span className="ml-3 rounded bg-main px-2 py-0.5 text-bg">new personal best!</span>}
-      </p>
+      <div className="flex flex-col items-center gap-3">
+        <p className="text-sub">
+          <span aria-hidden="true">✓ </span>Saved
+          {data.isPb && <span className="ml-3 rounded bg-main px-2 py-0.5 text-bg">new personal best!</span>}
+        </p>
+        <ShareActions
+          path={`/r/${data.id}`}
+          title={`${Math.round(data.wpm)} WPM on Keystride`}
+          text={`I typed ${Math.round(data.wpm)} WPM with ${Math.round(data.accuracy)}% accuracy on Keystride. Can you beat it?`}
+          copyLabel="copy result link"
+        />
+      </div>
     ) : (
       <p className="text-sub">
         <span aria-hidden="true">⚑ </span>
