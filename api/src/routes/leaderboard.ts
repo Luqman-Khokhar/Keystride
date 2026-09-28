@@ -17,6 +17,7 @@ leaderboardRouter.get("/", async (req, res) => {
       $match: {
         mode, amount, language: "english",
         flagged: false, deletedAt: null, punctuation: false, numbers: false,
+        competitionId: null,
       },
     },
     { $sort: { wpm: -1, createdAt: 1 } },

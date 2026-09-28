@@ -15,7 +15,7 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Enter your password").max(128),
 });
 
-const configSchema = z
+export const configSchema = z
   .object({
     mode: z.enum(["time", "words"]),
     amount: z.number().int(),
@@ -59,3 +59,35 @@ export const historyQuery = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
   before: z.iso.datetime().optional(),
 });
+
+export const DURATION_MINUTES = [15, 60, 360, 1440, 4320, 10080] as const;
+export const ATTEMPT_CAPS = [1, 3, 5, 10] as const;
+
+export const createCompetitionSchema = z.object({
+  title: z.string().trim().min(3, "At least 3 characters").max(60, "At most 60 characters"),
+  description: z.string().trim().max(280, "At most 280 characters").default(""),
+  config: configSchema,
+  visibility: z.enum(["public", "unlisted"]),
+  /** Omit to start now. */
+  startsAt: z.iso.datetime().optional(),
+  durationMinutes: z
+    .number()
+    .int()
+    .refine((m) => (DURATION_MINUTES as readonly number[]).includes(m), "Unsupported duration"),
+  maxPlayers: z.number().int().min(2, "At least 2 players").max(100, "At most 100 players").default(50),
+  maxAttempts: z
+    .number()
+    .int()
+    .refine((n) => (ATTEMPT_CAPS as readonly number[]).includes(n), "Unsupported attempt limit")
+    .nullable()
+    .default(null),
+});
+
+export const competitionListQuery = z.object({
+  status: z.enum(["live", "upcoming", "ended", "mine"]).default("live"),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+  /** Opaque cursor from the previous page. */
+  cursor: z.string().max(100).optional(),
+});
+
+export const slugParams = z.object({ slug: z.string().regex(/^[A-Za-z0-9]{6,12}$/) });

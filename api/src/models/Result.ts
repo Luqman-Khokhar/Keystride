@@ -30,6 +30,9 @@ const resultSchema = new Schema(
     flagged: { type: Boolean, default: false },
     flagReason: { type: String, default: null },
     isPb: { type: Boolean, default: false },
+    /** Set for competition attempts — excluded from personal bests and global leaderboards. */
+    competitionId: { type: Types.ObjectId, ref: "Competition", default: null },
+    competitionSlug: { type: String, default: null },
     deletedAt: { type: Date, default: null },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
