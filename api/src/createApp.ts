@@ -1,8 +1,8 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import express, { type NextFunction, type Request, type Response } from "express";
-import mongoose from "mongoose";
+import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import { config } from "./config";
+import { connectDb } from "./db";
 import { HttpError } from "./lib/http";
 import { loadUser, requireJson } from "./middleware/auth";
 import { authRouter } from "./routes/auth";
@@ -11,8 +11,11 @@ import { resultsRouter } from "./routes/results";
 import { usersRouter } from "./routes/users";
 
 export function createApp() {
-  const app = express();
+  return configureApp(express());
+}
 
+/** Installs middleware and routes on an Express app. */
+export function configureApp(app: Express) {
   app.disable("x-powered-by");
   // Requests arrive via the Next.js proxy (and Render's load balancer in production);
   // trust exactly those hops so req.ip is the visitor's IP for rate limiting.
@@ -24,11 +27,27 @@ export function createApp() {
   app.use(express.json({ limit: "1mb" }));
   app.use(cookieParser());
   app.use(requireJson);
-  app.use(loadUser);
 
-  app.get("/api/health", (_req, res) => {
-    res.json({ ok: true, db: mongoose.connection.readyState === 1 ? "connected" : "disconnected" });
+  // Also echoes the caller's own IP as the API sees it (confirms proxy settings after deploy).
+  app.get("/api/health", async (req, res) => {
+    const db = await connectDb().then(
+      () => "connected",
+      () => "unavailable",
+    );
+    res.status(db === "connected" ? 200 : 503).json({ ok: db === "connected", db, ip: req.ip });
   });
+
+  // Serverless instances start cold: make sure the DB is connected before any route runs.
+  app.use(async (_req, _res, next) => {
+    try {
+      await connectDb();
+    } catch (err) {
+      console.error("Database connection failed:", err);
+      throw new HttpError(503, "Service temporarily unavailable. Please try again.");
+    }
+    next();
+  });
+  app.use(loadUser);
   app.use("/api/auth", authRouter);
   app.use("/api/results", resultsRouter);
   app.use("/api/users", usersRouter);

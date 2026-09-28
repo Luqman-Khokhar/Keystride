@@ -2,6 +2,7 @@ import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
 import type { PipelineStage, Types } from "mongoose";
 import { HttpError, parse, userId } from "../lib/http";
+import { MongoRateLimitStore } from "../lib/rateLimitStore";
 import { verifySubmission } from "../lib/verify";
 import { requireAuth } from "../middleware/auth";
 import { ResultModel } from "../models/Result";
@@ -18,6 +19,7 @@ const submitLimiter = rateLimit({
   standardHeaders: "draft-8",
   legacyHeaders: false,
   keyGenerator: (req) => String(req.userId),
+  store: new MongoRateLimitStore("submit:"),
   message: { error: "Too many results submitted. Slow down a little." },
 });
 

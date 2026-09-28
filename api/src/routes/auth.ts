@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
 import { HttpError, parse } from "../lib/http";
+import { MongoRateLimitStore } from "../lib/rateLimitStore";
 import { DUMMY_HASH_PROMISE, hashPassword, verifyPassword } from "../lib/password";
 import { SESSION_COOKIE, createSession, destroySession } from "../lib/session";
 import { UserModel, publicUser } from "../models/User";
@@ -8,12 +9,31 @@ import { loginSchema, registerSchema } from "../schemas";
 
 export const authRouter = Router();
 
+// TRUST_PROXY=true is deliberate on Vercel (its edge overwrites client-sent X-Forwarded-For).
+const validate = { trustProxy: false };
+
+/** Per visitor IP: caps signups and login attempts from one place. */
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,
   standardHeaders: "draft-8",
   legacyHeaders: false,
+  store: new MongoRateLimitStore("auth:"),
+  validate,
   message: { error: "Too many attempts. Try again in a few minutes." },
+});
+
+/** Per account: failed logins only, so password guessing is capped regardless of IP. */
+const loginAccountLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  store: new MongoRateLimitStore("login:"),
+  validate,
+  skipSuccessfulRequests: true,
+  keyGenerator: (req) => String(req.body?.identifier ?? "").trim().toLowerCase().slice(0, 254),
+  message: { error: "Too many failed sign-in attempts for this account. Try again in 15 minutes." },
 });
 
 const isDuplicateKey = (err: unknown) => (err as { code?: number })?.code === 11000;
@@ -49,7 +69,7 @@ authRouter.post("/register", authLimiter, async (req, res) => {
   }
 });
 
-authRouter.post("/login", authLimiter, async (req, res) => {
+authRouter.post("/login", authLimiter, loginAccountLimiter, async (req, res) => {
   const { identifier, password } = parse(loginSchema, req.body);
   const lower = identifier.toLowerCase();
   const user = await UserModel.findOne({
