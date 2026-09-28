@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.*
+!.env.example
+dist/
+.next/
+*.log
+.DS_Store
+
+# Local tooling files (kept out of the repo)
+web/AGENTS.md
+web/CLAUDE.md

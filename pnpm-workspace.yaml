@@ -1,0 +1,9 @@
+packages:
+  - web
+  - api
+  - packages/*
+
+allowBuilds:
+  esbuild: true
+  sharp: false
+  unrs-resolver: false
