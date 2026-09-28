@@ -7,7 +7,7 @@
     "dev": "tsx watch --env-file-if-exists=.env src/dev.ts",
     "start": "tsx --env-file-if-exists=.env src/dev.ts",
     "lint": "tsc --noEmit",
-    "test": "tsx --test src/**/*.test.ts",
+    "test": "tsx --test \"src/**/*.test.ts\"",
     "build": "esbuild src/index.ts --bundle --platform=node --format=esm --target=node22 --packages=external --alias:@keystride/engine=../packages/engine/src/index.ts --outfile=index.js --log-level=warning"
   },
   "dependencies": {

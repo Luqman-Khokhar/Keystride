@@ -3,9 +3,12 @@
  * Local dev: the Next.js dev server on loopback. Production on Vercel: "true" — Vercel's edge
  * overwrites any client-sent X-Forwarded-For, so the left-most entry is the real visitor.
  */
-function trustProxy(raw: string | undefined): number | string {
-  const v = raw?.trim();
+export function trustProxy(raw: string | undefined): boolean | number | string {
+  const v = raw?.trim().toLowerCase();
   if (!v) return "loopback";
+  if (v === "true") return true;
+  if (v === "false") return false;
+  // Hop count, or a list of trusted addresses/subnets ("loopback, 10.0.0.0/8").
   return /^\d+$/.test(v) ? Number(v) : v;
 }
 
