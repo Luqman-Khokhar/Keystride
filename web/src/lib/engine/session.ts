@@ -51,8 +51,12 @@ export class TypingSession {
   /** Chars of correctly committed words plus their trailing spaces. */
   private committedNetChars = 0;
 
-  constructor(config: TestConfig, words?: string[]) {
+  /** Competitions use one shared word list: never append generated words to it. */
+  private readonly fixedWords: boolean;
+
+  constructor(config: TestConfig, words?: string[], opts: { fixedWords?: boolean } = {}) {
     this.config = config;
+    this.fixedWords = !!opts.fixedWords;
     const count =
       config.mode === "words" ? config.amount : TIME_MODE_BATCH + TIME_MODE_BUFFER;
     this.words = words ? [...words] : generateWords(count, config);
@@ -232,7 +236,7 @@ export class TypingSession {
   }
 
   private ensureWords() {
-    if (this.config.mode !== "time") return;
+    if (this.config.mode !== "time" || this.fixedWords) return;
     if (this.words.length - this.wordIndex > TIME_MODE_BUFFER) return;
     const more = generateWords(
       TIME_MODE_BATCH,

@@ -3,6 +3,12 @@ import type { SerializedError } from "@reduxjs/toolkit";
 import type { ResultSubmission } from "@keystride/engine";
 import type {
   ApiErrorBody,
+  AttemptResponse,
+  CompetitionDetail,
+  CompetitionPage,
+  CompetitionStatus,
+  CreateCompetitionInput,
+  Standings,
   HistoryPage,
   Leaderboard,
   Profile,
@@ -28,7 +34,7 @@ async function setMeOnSuccess(
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: "/api", credentials: "same-origin" }),
-  tagTypes: ["Me", "History", "Summary", "Leaderboard", "Profile"],
+  tagTypes: ["Me", "History", "Summary", "Leaderboard", "Profile", "Competitions", "Competition", "Standings"],
   endpoints: (b) => ({
     getMe: b.query<User | null, void>({
       // Signed out → { user: null }, not an error.
@@ -81,6 +87,51 @@ export const api = createApi({
       query: (username) => `/users/${encodeURIComponent(username)}`,
       providesTags: ["Profile"],
     }),
+    getCompetitions: b.infiniteQuery<CompetitionPage, CompetitionStatus | "mine", string | null>({
+      infiniteQueryOptions: {
+        initialPageParam: null,
+        getNextPageParam: (last) => last.nextCursor,
+      },
+      query: ({ queryArg, pageParam }) =>
+        `/competitions?status=${queryArg}&limit=12${pageParam ? `&cursor=${encodeURIComponent(pageParam)}` : ""}`,
+      providesTags: ["Competitions"],
+    }),
+    getCompetition: b.query<CompetitionDetail, string>({
+      query: (slug) => `/competitions/${encodeURIComponent(slug)}`,
+      providesTags: (_r, _e, slug) => [{ type: "Competition", id: slug }],
+    }),
+    getStandings: b.query<Standings, string>({
+      query: (slug) => `/competitions/${encodeURIComponent(slug)}/standings`,
+      providesTags: (_r, _e, slug) => [{ type: "Standings", id: slug }],
+    }),
+    createCompetition: b.mutation<{ slug: string }, CreateCompetitionInput>({
+      query: (body) => ({ url: "/competitions", method: "POST", body }),
+      invalidatesTags: ["Competitions"],
+    }),
+    joinCompetition: b.mutation<{ joined: boolean }, string>({
+      query: (slug) => ({ url: `/competitions/${encodeURIComponent(slug)}/join`, method: "POST", body: {} }),
+      invalidatesTags: (_r, _e, slug) => [
+        { type: "Competition", id: slug },
+        { type: "Standings", id: slug },
+        "Competitions",
+      ],
+    }),
+    submitAttempt: b.mutation<AttemptResponse, { slug: string; submission: ResultSubmission }>({
+      query: ({ slug, submission }) => ({
+        url: `/competitions/${encodeURIComponent(slug)}/attempts`,
+        method: "POST",
+        body: submission,
+      }),
+      invalidatesTags: (_r, _e, { slug }) => [
+        { type: "Competition", id: slug },
+        { type: "Standings", id: slug },
+        "History",
+      ],
+    }),
+    deleteCompetition: b.mutation<void, string>({
+      query: (slug) => ({ url: `/competitions/${encodeURIComponent(slug)}`, method: "DELETE", body: {} }),
+      invalidatesTags: ["Competitions"],
+    }),
   }),
 });
 
@@ -94,6 +145,13 @@ export const {
   useGetSummaryQuery,
   useGetLeaderboardQuery,
   useGetProfileQuery,
+  useGetCompetitionsInfiniteQuery,
+  useGetCompetitionQuery,
+  useGetStandingsQuery,
+  useCreateCompetitionMutation,
+  useJoinCompetitionMutation,
+  useSubmitAttemptMutation,
+  useDeleteCompetitionMutation,
 } = api;
 
 type AnyError = FetchBaseQueryError | SerializedError | undefined;
