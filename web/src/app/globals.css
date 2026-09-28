@@ -1,0 +1,184 @@
+@import "tailwindcss";
+
+/*
+ * Theme tokens. Single dark theme for V1; new themes override these
+ * variables on [data-theme="..."] without touching components.
+ */
+:root {
+  --bg: #1e1f22;
+  --bg-alt: #2a2c30;
+  --sub: #8a8d93;
+  --sub-alt: #3a3d42;
+  --text: #d8d6cc;
+  --main: #e2b714;
+  --caret: #e2b714;
+  --error: #f0616d;
+  --error-extra: #b3434f;
+
+  /* Typing area metrics — line height and gap drive the 3-line window. */
+  --word-size: 1.25rem;
+  --word-line: 1.9rem;
+  --word-gap-y: 0.5rem;
+  --word-gap-x: 0.6em;
+
+  color-scheme: dark;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --word-size: 1.6rem;
+    --word-line: 2.4rem;
+  }
+}
+
+/* Font size setting (data-font-size on <html>). "md" = defaults above. */
+:root[data-font-size="sm"] {
+  --word-size: 1.1rem;
+  --word-line: 1.7rem;
+}
+:root[data-font-size="lg"] {
+  --word-size: 1.5rem;
+  --word-line: 2.25rem;
+}
+:root[data-font-size="xl"] {
+  --word-size: 1.75rem;
+  --word-line: 2.6rem;
+}
+@media (min-width: 640px) {
+  :root[data-font-size="sm"] {
+    --word-size: 1.3rem;
+    --word-line: 2rem;
+  }
+  :root[data-font-size="lg"] {
+    --word-size: 2rem;
+    --word-line: 3rem;
+  }
+  :root[data-font-size="xl"] {
+    --word-size: 2.5rem;
+    --word-line: 3.6rem;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-alt: var(--bg-alt);
+  --color-sub: var(--sub);
+  --color-sub-alt: var(--sub-alt);
+  --color-text: var(--text);
+  --color-main: var(--main);
+  --color-caret: var(--caret);
+  --color-error: var(--error);
+  --color-error-extra: var(--error-extra);
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-sans: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+::selection {
+  background: var(--main);
+  color: var(--bg);
+}
+
+/* ---- typing area ------------------------------------------------------- */
+
+.words-window {
+  height: calc(var(--word-line) * 3 + var(--word-gap-y) * 2);
+  overflow: hidden;
+}
+
+.words {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--word-gap-x);
+  row-gap: var(--word-gap-y);
+  font-size: var(--word-size);
+  line-height: var(--word-line);
+  transition: transform 150ms ease-out;
+  will-change: transform;
+}
+
+.word {
+  display: inline-flex;
+}
+.word.error {
+  box-shadow: inset 0 -2px 0 var(--error);
+}
+
+.letter {
+  color: var(--sub);
+}
+.letter.correct {
+  color: var(--text);
+}
+.letter.incorrect {
+  color: var(--error);
+}
+.letter.extra {
+  color: var(--error-extra);
+}
+
+.caret {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: calc(var(--word-line) * 0.8);
+  margin-top: calc(var(--word-line) * 0.1);
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--caret);
+  pointer-events: none;
+  transition: transform 90ms ease-out;
+  will-change: transform;
+}
+.caret.blink {
+  animation: caret-blink 1s step-end infinite;
+}
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Caret style setting (data-caret on <html>). */
+:root[data-caret="block"] .caret {
+  width: 1ch;
+  margin-left: 0;
+  opacity: 0.45;
+}
+:root[data-caret="underline"] .caret {
+  width: 1ch;
+  height: 2px;
+  margin-left: 0;
+  margin-top: calc(var(--word-line) * 0.85);
+}
+:root[data-caret="off"] .caret {
+  display: none;
+}
+:root[data-smooth-caret="off"] .caret {
+  transition: none;
+}
+
+/* Blind mode: mistakes are recorded but not shown. */
+:root[data-blind="on"] .letter.incorrect,
+:root[data-blind="on"] .letter.extra {
+  color: var(--text);
+}
+:root[data-blind="on"] .word.error {
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .words,
+  .caret {
+    transition: none;
+  }
+  .caret.blink {
+    animation: none;
+  }
+}
