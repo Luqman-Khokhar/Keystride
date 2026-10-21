@@ -65,6 +65,30 @@ export function replay(keystrokes: readonly Keystroke[]): Replay | null {
   return { typed, index };
 }
 
+/**
+ * Races: every word must be typed exactly before moving on. True when the log finishes the
+ * text and never commits a wrong word with space.
+ */
+export function allWordsExact(sub: ResultSubmission): boolean {
+  if (sub.committed !== sub.words.length) return false;
+  const cur: string[] = [""];
+  let idx = 0;
+  for (const k of sub.keystrokes) {
+    if (k.key === KEY_SPACE) {
+      if (cur[idx] !== sub.words[idx]) return false;
+      idx++;
+      cur[idx] ??= "";
+    } else if (k.key === KEY_DELETE) {
+      cur[idx] = cur[idx].slice(0, -1);
+    } else if (k.key === KEY_PREV_WORD) {
+      return false;
+    } else {
+      cur[idx] += k.key;
+    }
+  }
+  return sub.words.every((w, i) => cur[i] === w);
+}
+
 function coefficientOfVariation(values: number[]): number {
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
   if (mean === 0) return 0;

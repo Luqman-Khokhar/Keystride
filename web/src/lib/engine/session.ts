@@ -53,10 +53,17 @@ export class TypingSession {
 
   /** Competitions use one shared word list: never append generated words to it. */
   private readonly fixedWords: boolean;
+  /** Races: space only moves on once the word is typed exactly. */
+  private readonly strictWords: boolean;
 
-  constructor(config: TestConfig, words?: string[], opts: { fixedWords?: boolean } = {}) {
+  constructor(
+    config: TestConfig,
+    words?: string[],
+    opts: { fixedWords?: boolean; strictWords?: boolean } = {},
+  ) {
     this.config = config;
     this.fixedWords = !!opts.fixedWords;
+    this.strictWords = !!opts.strictWords;
     const count =
       config.mode === "words" ? config.amount : TIME_MODE_BATCH + TIME_MODE_BUFFER;
     this.words = words ? [...words] : generateWords(count, config);
@@ -199,6 +206,7 @@ export class TypingSession {
     const i = this.wordIndex;
     const input = this.typed[i] ?? "";
     if (!input) return false;
+    if (this.strictWords && input !== this.words[i]) return false;
 
     const correct = input === this.words[i];
     this.log(KEY_SPACE, correct, now);

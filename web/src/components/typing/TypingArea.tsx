@@ -132,8 +132,8 @@ export function TypingArea({ session, inputRef, children }: TypingAreaProps) {
       }
       // Mobile keyboards deliver spaces (and autocorrected words) via input events.
       session.setInput(value.slice(0, space), now);
-      session.commitWord(now);
-      input.value = "";
+      // A refused space (race word not right yet) keeps the word in the box.
+      input.value = session.commitWord(now) ? "" : value.slice(0, space);
     },
     [session],
   );
