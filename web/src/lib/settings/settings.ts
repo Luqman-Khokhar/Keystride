@@ -20,6 +20,8 @@ export interface Settings {
   liveWpm: boolean;
   liveAccuracy: boolean;
   blindMode: boolean;
+  /** Races: show opponents' carets inside the text. */
+  rivalCarets: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -33,6 +35,7 @@ export const DEFAULT_SETTINGS: Settings = {
   liveWpm: false,
   liveAccuracy: false,
   blindMode: false,
+  rivalCarets: true,
 };
 
 const STORAGE_KEY = "ks:settings";
@@ -55,6 +58,7 @@ function sanitize(raw: Partial<Settings>): Settings {
     liveWpm: typeof raw.liveWpm === "boolean" ? raw.liveWpm : d.liveWpm,
     liveAccuracy: typeof raw.liveAccuracy === "boolean" ? raw.liveAccuracy : d.liveAccuracy,
     blindMode: typeof raw.blindMode === "boolean" ? raw.blindMode : d.blindMode,
+    rivalCarets: typeof raw.rivalCarets === "boolean" ? raw.rivalCarets : d.rivalCarets,
   };
 }
 

@@ -37,6 +37,9 @@ export interface RaceProgressEvent {
   /** 0–1 share of the text typed correctly. */
   p: number;
   wpm: number;
+  /** Word index and correct letters into it: where their caret sits in the text. */
+  w: number;
+  c: number;
 }
 
 /** Lasers have four colors; players keep theirs by join order, so everyone sees the same. */

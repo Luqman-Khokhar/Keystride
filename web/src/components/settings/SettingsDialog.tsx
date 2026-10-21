@@ -178,6 +178,9 @@ export function SettingsDialog() {
                   <Row title="Blind mode" description="Mistakes are still counted but not highlighted.">
                     <Switch label="Blind mode" checked={s.blindMode} onChange={(blindMode) => set({ blindMode })} />
                   </Row>
+                  <Row title="Rival carets" description="In races, show other players' carets in the text.">
+                    <Switch label="Rival carets" checked={s.rivalCarets} onChange={(rivalCarets) => set({ rivalCarets })} />
+                  </Row>
                 </>
               )}
             </section>

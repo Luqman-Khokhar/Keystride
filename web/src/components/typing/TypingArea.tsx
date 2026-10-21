@@ -19,9 +19,11 @@ interface TypingAreaProps {
   session: TypingSession;
   /** Called with the input element so the parent can refocus after restart. */
   inputRef: React.RefObject<HTMLInputElement | null>;
+  /** Overlays laid out in word-list coordinates (race rival carets); scroll with the text. */
+  children?: React.ReactNode;
 }
 
-export function TypingArea({ session, inputRef }: TypingAreaProps) {
+export function TypingArea({ session, inputRef, children }: TypingAreaProps) {
   const words = useSyncExternalStore(session.subscribe, session.getWords, session.getWords);
   const phase = useSyncExternalStore(session.subscribe, session.getPhase, session.getPhase);
 
@@ -229,6 +231,7 @@ export function TypingArea({ session, inputRef }: TypingAreaProps) {
             ref={caretRef}
             className={`caret ${phase === "idle" ? "blink" : ""} ${focused ? "" : "invisible"}`}
           />
+          {children}
         </div>
       </div>
 

@@ -309,3 +309,65 @@ body {
     transition: none !important;
   }
 }
+
+/* Other racers' carets, drawn inside the text in their laser color. */
+.rival-caret {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: calc(var(--word-line) * 0.8);
+  margin-top: calc(var(--word-line) * 0.1);
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--lane);
+  opacity: 0.6;
+  pointer-events: none;
+  transition: transform 140ms linear;
+  will-change: transform;
+}
+.rival-tag {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--lane);
+}
+
+/* Overtake cue: a short tint around the typing area in the passer's color. */
+@keyframes race-flash {
+  from {
+    box-shadow: inset 0 0 0 2px var(--lane), 0 0 28px -6px var(--lane);
+  }
+  to {
+    box-shadow: inset 0 0 0 2px transparent, 0 0 28px -6px transparent;
+  }
+}
+.race-flash {
+  animation: race-flash 1.4s ease-out forwards;
+}
+@keyframes race-note {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.race-note {
+  animation: race-note 2.2s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rival-caret {
+    transition: none;
+  }
+  .race-flash {
+    animation: none;
+  }
+}
