@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { formatRaceTime } from "@/lib/race";
 import { errorMessage, useGetStandingsQuery } from "@/store/api";
-import { ErrorState, primaryButtonCls, Skeleton } from "@/components/ui/states";
+import { buttonCls, ErrorState, primaryButtonCls, Skeleton } from "@/components/ui/states";
 
 /** Final order: finishers by time, then everyone who didn't finish. */
-export function RaceResults({ slug, me }: { slug: string; me?: string }) {
+export function RaceResults({ slug, me, actions }: { slug: string; me?: string; actions?: React.ReactNode }) {
   const { data, error, isLoading, refetch } = useGetStandingsQuery(slug);
 
   return (
@@ -58,8 +58,9 @@ export function RaceResults({ slug, me }: { slug: string; me?: string }) {
           })}
         </ol>
       )}
-      <div className="border-t border-line pt-4">
-        <Link href="/competitions/race" className={primaryButtonCls}>
+      <div className="flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-start">
+        {actions}
+        <Link href="/competitions/race" className={actions ? buttonCls : primaryButtonCls}>
           Start a new race
         </Link>
       </div>

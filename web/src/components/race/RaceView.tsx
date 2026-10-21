@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect } from "react";
 import { testLabel } from "@/lib/format";
+import { RACE_REMATCH_WINDOW_MS } from "@/lib/race";
 import { useGetMeQuery, useGetStandingsQuery } from "@/store/api";
 import type { CompetitionDetail, CompetitionStatus } from "@/store/types";
 import { AlertIcon } from "@/components/ui/icons";
@@ -12,6 +13,7 @@ import { JoinButton } from "@/components/competitions/JoinButton";
 import { useServerClock } from "@/components/competitions/useServerClock";
 import { RaceCountdown } from "./RaceCountdown";
 import { RaceLobby } from "./RaceLobby";
+import { RaceRematch } from "./RaceRematch";
 import { RaceResults } from "./RaceResults";
 import { RaceRun } from "./RaceRun";
 import { useRaceConnection, useRaceEvents, useRacePresence } from "./useRaceChannel";
@@ -120,17 +122,27 @@ export function RaceView({ comp, status }: Props) {
 
   let body: React.ReactNode;
   if (status === "ended") {
-    body = started ? (
-      <RaceResults slug={comp.slug} me={user?.username} />
-    ) : (
-      <Panel>
-        <p className="text-2xl font-semibold tracking-tight text-text">This lobby has closed</p>
-        <p className="text-sub">The host didn&apos;t start the race within an hour.</p>
-        <Link href="/competitions/race" className={primaryButtonCls}>
-          Start a new race
-        </Link>
-      </Panel>
-    );
+    // Racers stay connected for a while after the end, to call or answer a rematch.
+    const rematchOpen = Date.parse(comp.serverNow) - Date.parse(comp.endsAt) < RACE_REMATCH_WINDOW_MS;
+    if (!started) {
+      body = (
+        <Panel>
+          <p className="text-2xl font-semibold tracking-tight text-text">This lobby has closed</p>
+          <p className="text-sub">The host didn&apos;t start the race within an hour.</p>
+          <Link href="/competitions/race" className={primaryButtonCls}>
+            Start a new race
+          </Link>
+        </Panel>
+      );
+    } else if (user && joined && rematchOpen) {
+      body = (
+        <RaceRealtime key={comp.slug} slug={comp.slug}>
+          <RaceRematch comp={comp} me={user.username} />
+        </RaceRealtime>
+      );
+    } else {
+      body = <RaceResults slug={comp.slug} me={user?.username} />;
+    }
   } else if (isLoading) {
     body = <Skeleton className="h-64 w-full" />;
   } else if (!user) {

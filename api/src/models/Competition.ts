@@ -30,7 +30,16 @@ const competitionSchema = new Schema(
      * reads as "upcoming" (text hidden) and then "ended" — never live without a start.
      */
     race: {
-      type: new Schema({ startedAt: { type: Date, default: null } }, { _id: false }),
+      type: new Schema(
+        {
+          startedAt: { type: Date, default: null },
+          /** Lobby created by "Rematch" once this race ended. */
+          rematchSlug: { type: String, default: null },
+          /** The race this lobby is a rematch of. */
+          rematchOf: { type: String, default: null },
+        },
+        { _id: false },
+      ),
       default: null,
     },
     deletedAt: { type: Date, default: null },

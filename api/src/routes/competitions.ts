@@ -2,7 +2,14 @@ import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
 import type { PipelineStage, Types } from "mongoose";
 import type { TestConfig } from "@keystride/engine";
-import { RACE_LOBBY_MS, competitionWords, matchesCompetition, newSlug, raceWindow } from "../lib/competition";
+import {
+  RACE_LOBBY_MS,
+  RACE_REMATCH_WINDOW_MS,
+  competitionWords,
+  matchesCompetition,
+  newSlug,
+  raceWindow,
+} from "../lib/competition";
 import { HttpError, parse, userId } from "../lib/http";
 import { MongoRateLimitStore } from "../lib/rateLimitStore";
 import { publishRace, raceTokenRequest } from "../lib/realtime";
@@ -121,23 +128,32 @@ competitionsRouter.post("/races", requireAuth, createLimiter, async (req, res) =
     numbers: input.numbers,
     language: "english",
   };
-  // Lobby: startsAt = endsAt = expiry, so it stays "upcoming" until the host starts it.
-  const expiresAt = new Date(Date.now() + RACE_LOBBY_MS);
+  const slug = await insertRace(uid, input.title, config, input.maxPlayers, null);
+  res.status(201).json({ slug });
+});
 
-  const slug = await insertCompetition(uid, {
+/** A new race lobby. Lobby: startsAt = endsAt = expiry, so it stays "upcoming" until the host starts it. */
+function insertRace(
+  uid: Types.ObjectId,
+  title: string,
+  config: TestConfig,
+  maxPlayers: number,
+  rematchOf: string | null,
+): Promise<string> {
+  const expiresAt = new Date(Date.now() + RACE_LOBBY_MS);
+  return insertCompetition(uid, {
     kind: "race",
-    title: input.title,
+    title,
     config,
     words: competitionWords(config),
     visibility: "unlisted",
     startsAt: expiresAt,
     endsAt: expiresAt,
-    maxPlayers: input.maxPlayers,
+    maxPlayers,
     maxAttempts: 1,
-    race: { startedAt: null },
+    race: { startedAt: null, rematchSlug: null, rematchOf },
   });
-  res.status(201).json({ slug });
-});
+}
 
 /** Creates a competition under a fresh slug, with its creator as the first player. */
 async function insertCompetition(uid: Types.ObjectId, fields: Record<string, unknown>): Promise<string> {
@@ -219,7 +235,14 @@ competitionsRouter.get("/:slug", async (req, res) => {
     // The text stays secret until the start, so nobody can practise it.
     // A started race shows it during the countdown, like the start event does.
     words: status === "upcoming" && !comp.race?.startedAt ? null : comp.words,
-    race: comp.kind === "race" ? { startedAt: comp.race?.startedAt ?? null } : null,
+    race:
+      comp.kind === "race"
+        ? {
+            startedAt: comp.race?.startedAt ?? null,
+            rematchSlug: comp.race?.rematchSlug ?? null,
+            rematchOf: comp.race?.rematchOf ?? null,
+          }
+        : null,
     me: req.userId
       ? {
           joined: !!entry,
@@ -317,6 +340,8 @@ competitionsRouter.post("/:slug/join", requireAuth, async (req, res) => {
     await CompetitionModel.updateOne({ _id: comp._id }, { $inc: { playerCount: -1 } });
     if ((err as { code?: number }).code !== 11000) throw err;
   }
+  // Players still on the old race's results see who's in, to nudge the rest.
+  if (comp.race?.rematchOf) await announceRematchPlayers(comp, uid);
   res.status(201).json({ joined: true });
 });
 
@@ -505,12 +530,66 @@ competitionsRouter.get("/:slug/realtime-token", requireAuth, async (req, res) =>
   const uid = userId(req);
   const comp = await findCompetition(slug);
   if (comp.kind !== "race") throw new HttpError(404, "Race not found");
-  if (statusOf(comp) === "ended") throw new HttpError(409, "This race is over");
+  // Finished races stay connected a while so their players can call a rematch.
+  if (comp.endsAt.getTime() < Date.now() - RACE_REMATCH_WINDOW_MS) throw new HttpError(409, "This race is over");
   if (!(await CompetitionEntryModel.exists({ competitionId: comp._id, userId: uid }))) {
     throw new HttpError(403, "Join the race first");
   }
   res.json(await raceTokenRequest(comp.slug, String(uid)));
 });
+
+/**
+ * Opens a rematch lobby (same settings, new text) hosted by whoever asks first; later
+ * callers get the same lobby. Everyone still on the results hears about it.
+ */
+competitionsRouter.post("/:slug/rematch", requireAuth, createLimiter, async (req, res) => {
+  const { slug } = parse(slugParams, req.params);
+  const uid = userId(req);
+  const comp = await findCompetition(slug);
+  if (comp.kind !== "race") throw new HttpError(404, "Race not found");
+  if (!comp.race?.startedAt || statusOf(comp) !== "ended") {
+    throw new HttpError(409, "A rematch opens once the race is over");
+  }
+  if (!(await CompetitionEntryModel.exists({ competitionId: comp._id, userId: uid }))) {
+    throw new HttpError(403, "Only racers can call a rematch");
+  }
+  if (comp.race.rematchSlug) {
+    res.json({ slug: comp.race.rematchSlug });
+    return;
+  }
+
+  const rematch = await insertRace(uid, comp.title, comp.config as TestConfig, comp.maxPlayers, comp.slug);
+  const claimed = await CompetitionModel.findOneAndUpdate(
+    { _id: comp._id, "race.rematchSlug": null },
+    { $set: { "race.rematchSlug": rematch } },
+  );
+  if (!claimed) {
+    // Someone else called it at the same moment: drop ours, send everyone to theirs.
+    await CompetitionModel.updateOne({ slug: rematch }, { $set: { deletedAt: new Date() } });
+    const winner = await findCompetition(slug);
+    res.json({ slug: winner.race?.rematchSlug });
+    return;
+  }
+
+  const user = await UserModel.findById(uid).select("username").lean();
+  await publishRace(comp.slug, "rematch", { slug: rematch, by: user?.username ?? "[deleted]" });
+  res.status(201).json({ slug: rematch });
+});
+
+/** Tells the original race's channel who has joined its rematch lobby so far. */
+async function announceRematchPlayers(rematch: CompDoc, uid: Types.ObjectId) {
+  const entries = await CompetitionEntryModel.find({ competitionId: rematch._id })
+    .sort({ joinedAt: 1 })
+    .select("userId")
+    .lean();
+  const names = await usernamesById(entries.map((e) => e.userId as Types.ObjectId));
+  await publishRace(rematch.race!.rematchOf!, "rematch-join", {
+    slug: rematch.slug,
+    username: names.get(String(uid)) ?? "[deleted]",
+    players: entries.map((e) => names.get(String(e.userId))).filter(Boolean),
+    maxPlayers: rematch.maxPlayers,
+  });
+}
 
 // ---- delete ------------------------------------------------------------------------
 

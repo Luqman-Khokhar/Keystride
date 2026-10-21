@@ -61,3 +61,6 @@ export function raceWindow(now: number, words: number): { startsAt: Date; endsAt
   const startsAt = now + RACE_COUNTDOWN_MS;
   return { startsAt: new Date(startsAt), endsAt: new Date(startsAt + raceCapMs(words)) };
 }
+
+/** How long after a race ends its players stay connected for a rematch. */
+export const RACE_REMATCH_WINDOW_MS = 30 * 60 * 1000;
