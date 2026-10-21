@@ -265,3 +265,12 @@ body {
     stroke-dashoffset: 0;
   }
 }
+
+/* ---- races ------------------------------------------------------------- */
+
+@keyframes race-pop {
+  from {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}

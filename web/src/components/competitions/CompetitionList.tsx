@@ -5,7 +5,7 @@ import { useState } from "react";
 import { errorMessage, useGetCompetitionsInfiniteQuery, useGetMeQuery } from "@/store/api";
 import type { CompetitionPage, CompetitionStatus } from "@/store/types";
 import { buttonCls, EmptyState, ErrorState, linkCls, primaryButtonCls, Skeleton, Spinner } from "@/components/ui/states";
-import { PlusIcon } from "@/components/ui/icons";
+import { FlagIcon, PlusIcon } from "@/components/ui/icons";
 import { CompetitionCard } from "./CompetitionCard";
 import { useServerClock } from "./useServerClock";
 
@@ -66,10 +66,16 @@ export function CompetitionList({ initial }: CompetitionListProps) {
           <h1 className="text-2xl font-semibold tracking-tight text-text">Competitions</h1>
           <p className="text-sm text-sub">Race friends on the same text. Best verified score wins.</p>
         </div>
-        <Link href={user ? "/competitions/new" : "/login?next=/competitions/new"} className={primaryButtonCls}>
-          <PlusIcon className="size-4" />
-          Create competition
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href={user ? "/competitions/race" : "/login?next=/competitions/race"} className={buttonCls}>
+            <FlagIcon className="size-4" />
+            Start a race
+          </Link>
+          <Link href={user ? "/competitions/new" : "/login?next=/competitions/new"} className={primaryButtonCls}>
+            <PlusIcon className="size-4" />
+            Create competition
+          </Link>
+        </div>
       </div>
 
       <div role="group" aria-label="Filter competitions" className="flex w-fit max-w-full flex-wrap gap-1 rounded-surface bg-bg-alt p-1">

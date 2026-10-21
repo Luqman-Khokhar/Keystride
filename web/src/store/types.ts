@@ -84,9 +84,12 @@ export interface ApiErrorBody {
 
 export type CompetitionStatus = "upcoming" | "live" | "ended";
 export type CompetitionVisibility = "public" | "unlisted";
+/** "race": everyone starts together when the host says go; one attempt, ranked by finish time. */
+export type CompetitionKind = "standard" | "race";
 
 export interface CompetitionSummary {
   slug: string;
+  kind: CompetitionKind;
   title: string;
   creator: string;
   config: TestConfig;
@@ -112,7 +115,16 @@ export interface CompetitionDetail extends CompetitionSummary {
   serverNow: string;
   /** null until the competition starts. */
   words: string[] | null;
-  me: { joined: boolean; isCreator: boolean; attempts: number; best: CompetitionBest | null } | null;
+  /** Races only. startedAt is null while the lobby is open. */
+  race: { startedAt: string | null } | null;
+  me: {
+    joined: boolean;
+    isCreator: boolean;
+    attempts: number;
+    best: CompetitionBest | null;
+    /** Races only: verified finish, in ms after the start. */
+    race: { finishMs: number } | null;
+  } | null;
 }
 
 export interface CompetitionPage {
@@ -126,6 +138,8 @@ export interface StandingsEntry {
   attempts: number;
   joinedAt: string;
   best: CompetitionBest | null;
+  /** Races only: verified finish, in ms after the start. */
+  finishMs: number | null;
 }
 
 export interface Standings {
@@ -146,6 +160,20 @@ export interface CreateCompetitionInput {
   maxAttempts: number | null;
 }
 
+export interface CreateRaceInput {
+  title: string;
+  words: number;
+  punctuation: boolean;
+  numbers: boolean;
+  maxPlayers: number;
+}
+
+export interface RaceStartResponse {
+  startsAt: string;
+  endsAt: string;
+  serverNow: string;
+}
+
 export interface AttemptResponse {
   resultId: string;
   wpm: number;
@@ -157,6 +185,7 @@ export interface AttemptResponse {
   attemptsLeft: number | null;
   rank: number | null;
   best: number | null;
+  race: { finishMs: number; place: number } | null;
 }
 
 /** Public share view of a verified result (/r/<id>). */
