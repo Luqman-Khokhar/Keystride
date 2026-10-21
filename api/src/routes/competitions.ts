@@ -13,7 +13,7 @@ import {
 import { HttpError, parse, userId } from "../lib/http";
 import { MongoRateLimitStore } from "../lib/rateLimitStore";
 import { publishRace, raceTokenRequest } from "../lib/realtime";
-import { verifySubmission } from "../lib/verify";
+import { allWordsExact, verifySubmission } from "../lib/verify";
 import { requireAuth } from "../middleware/auth";
 import { CompetitionModel, statusOf, type Competition } from "../models/Competition";
 import { CompetitionEntryModel } from "../models/CompetitionEntry";
@@ -377,7 +377,11 @@ competitionsRouter.post("/:slug/attempts", requireAuth, attemptLimiter, async (r
   const verdict = verifySubmission(sub);
   if (!verdict.ok) throw new HttpError(422, `Attempt rejected: ${verdict.error}`);
   const { result, flagReason } = verdict;
-  if (result.accuracy < MIN_ACCURACY) {
+  // Races make every word exact before moving on, so mistakes already cost time: no accuracy floor.
+  if (isRace && !allWordsExact(sub)) {
+    throw new HttpError(422, "Attempt rejected: every race word must be typed correctly");
+  }
+  if (!isRace && result.accuracy < MIN_ACCURACY) {
     throw new HttpError(422, `Accuracy under ${MIN_ACCURACY}% — attempt not counted`);
   }
 

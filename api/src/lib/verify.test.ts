@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { KEY_DELETE, KEY_PREV_WORD, KEY_SPACE, type Keystroke, type ResultSubmission, type TestConfig } from "@keystride/engine";
-import { replay, verifySubmission } from "./verify";
+import { allWordsExact, replay, verifySubmission } from "./verify";
 
 const TIME15: TestConfig = { mode: "time", amount: 15, punctuation: false, numbers: false, language: "english" };
 
@@ -120,5 +120,22 @@ describe("verifySubmission", () => {
     assert.ok(v.ok, v.ok ? "" : v.error);
     assert.equal(v.flagReason, null);
     assert.equal(v.result.chars.correct, words.join("").length);
+  });
+});
+
+describe("allWordsExact", () => {
+  const WORDS3: TestConfig = { ...TIME15, mode: "words", amount: 3 };
+  const words = WORDS.slice(0, 3);
+
+  it("accepts a race typed word for word", () => {
+    assert.equal(allWordsExact(simulate(words, words, { config: WORDS3 })), true);
+  });
+
+  it("rejects a wrong word committed with space", () => {
+    assert.equal(allWordsExact(simulate(words, ["the", "wrld", "people"], { config: WORDS3 })), false);
+  });
+
+  it("rejects an unfinished race", () => {
+    assert.equal(allWordsExact(simulate(words, ["the", "world"], { config: WORDS3 })), false);
   });
 });

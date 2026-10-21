@@ -43,7 +43,7 @@ interface Other {
  * the full laser track takes over so the player can watch the others come in.
  */
 export function RaceRun({ comp, words, me, online, players }: Props) {
-  const [session] = useState(() => new TypingSession(comp.config, words, { fixedWords: true }));
+  const [session] = useState(() => new TypingSession(comp.config, words, { fixedWords: true, strictWords: true }));
   const phase = useSyncExternalStore(session.subscribe, session.getPhase, session.getPhase);
   const inputRef = useRef<HTMLInputElement>(null);
   const { rivalCarets } = useSettings();
