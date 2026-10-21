@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { RACE_PLAYER_OPTIONS, RACE_WORD_OPTIONS } from "@/lib/race";
+import { RACE_PLAYER_OPTIONS, RACE_TRACK_OPTIONS, RACE_WORD_OPTIONS, type RaceTrackStyle } from "@/lib/race";
 import { errorMessage, fieldErrors, useCreateRaceMutation, useGetMeQuery } from "@/store/api";
 import { Field } from "@/components/auth/Field";
 import { Row, Segmented, Switch } from "@/components/settings/controls";
@@ -20,6 +20,7 @@ export function CreateRaceForm() {
   const [punctuation, setPunctuation] = useState(false);
   const [numbers, setNumbers] = useState(false);
   const [maxPlayers, setMaxPlayers] = useState(4);
+  const [track, setTrack] = useState<RaceTrackStyle>("laser");
 
   const fields = fieldErrors(error);
   const onForm = () => {
@@ -41,7 +42,7 @@ export function CreateRaceForm() {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const res = await create({ title, words, punctuation, numbers, maxPlayers });
+    const res = await create({ title, words, punctuation, numbers, maxPlayers, track });
     if ("data" in res && res.data) router.push(`/c/${res.data.slug}`);
   };
 
@@ -90,6 +91,9 @@ export function CreateRaceForm() {
           options={RACE_PLAYER_OPTIONS.map((n) => ({ value: String(n), label: String(n) }))}
           onChange={(v) => setMaxPlayers(Number(v))}
         />
+      </Row>
+      <Row title="Track" description="How everyone's progress is drawn.">
+        <Segmented label="Track style" value={track} options={RACE_TRACK_OPTIONS} onChange={setTrack} />
       </Row>
 
       {(otherError || (error && !Object.keys(fields).length)) && (

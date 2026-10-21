@@ -37,6 +37,8 @@ const competitionSchema = new Schema(
           rematchSlug: { type: String, default: null },
           /** The race this lobby is a rematch of. */
           rematchOf: { type: String, default: null },
+          /** How progress is drawn: glowing lasers or pixel runners. */
+          track: { type: String, enum: ["laser", "runners"], default: "laser" },
         },
         { _id: false },
       ),
