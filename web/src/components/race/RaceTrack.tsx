@@ -72,8 +72,40 @@ function LaserLane({ lane }: { lane: Lane }) {
   );
 }
 
+/** Thin lasers only, sat right above the text so they stay in side vision while typing. */
+function CompactTrack({ lanes }: { lanes: Lane[] }) {
+  return (
+    <ol aria-label="Race progress" className="flex flex-col gap-1.5">
+      {lanes.map((lane) => (
+        <li
+          key={lane.username}
+          aria-label={`${lane.username}${lane.isMe ? " (you)" : ""}: ${
+            lane.finish ? `finished ${lane.finish.place}` : `${Math.round(lane.p * 100)}%`
+          }`}
+          className={`relative h-2.5 overflow-hidden rounded-full bg-bg-alt px-1.5 transition-opacity duration-300 ${
+            lane.online || lane.finish ? "" : "opacity-40"
+          }`}
+          style={{ "--lane": `var(--lane-${lane.color})` } as React.CSSProperties}
+        >
+          <div className="relative h-full">
+            <div
+              aria-hidden="true"
+              className={`laser-track absolute inset-0 transition-transform ease-linear ${lane.isMe ? "duration-75" : "duration-150"}`}
+              style={{ transform: `translateX(${(lane.p - 1) * 100}%)` }}
+            >
+              <span className="laser-beam absolute inset-x-0 top-1/2 h-px -translate-y-1/2" />
+              <span className="laser-head absolute top-1/2 right-0 size-1.5 translate-x-1/2 -translate-y-1/2 rounded-full" />
+            </div>
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 /** One glowing laser per player, racing to the finish line on the right. */
-export function RaceTrack({ lanes }: { lanes: Lane[] }) {
+export function RaceTrack({ lanes, compact = false }: { lanes: Lane[]; compact?: boolean }) {
+  if (compact) return <CompactTrack lanes={lanes} />;
   return (
     <section aria-label="Race progress" className="rounded-surface border border-line bg-surface p-4 sm:p-5">
       <ol className="flex flex-col gap-3">
