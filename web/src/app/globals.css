@@ -30,6 +30,12 @@
   --surface: color-mix(in oklab, var(--text) 4%, var(--bg));
   --main-soft: color-mix(in oklab, var(--main) 15%, var(--bg));
 
+  /* Race lasers: lane 1 follows the theme accent, the rest are fixed neon hues. */
+  --lane-1: var(--main);
+  --lane-2: #3ad1f0;
+  --lane-3: #f0569b;
+  --lane-4: #7be08f;
+
   /* Motion. */
   --dur-fast: 120ms;
   --dur-base: 200ms;
@@ -87,6 +93,10 @@
   --color-line-strong: var(--line-strong);
   --color-surface: var(--surface);
   --color-main-soft: var(--main-soft);
+  --color-lane-1: var(--lane-1);
+  --color-lane-2: var(--lane-2);
+  --color-lane-3: var(--lane-3);
+  --color-lane-4: var(--lane-4);
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
 }
@@ -272,5 +282,30 @@ body {
   from {
     opacity: 0;
     transform: scale(1.4);
+  }
+}
+
+/* One laser lane: a beam translated in from the left, with a glowing head at its tip. */
+.laser-beam {
+  background: linear-gradient(to right, transparent, var(--lane) 70%);
+  box-shadow: 0 0 6px var(--lane), 0 0 14px color-mix(in oklab, var(--lane) 60%, transparent);
+}
+.laser-head {
+  background: color-mix(in oklab, var(--lane) 35%, white);
+  box-shadow: 0 0 6px 2px var(--lane), 0 0 18px 6px color-mix(in oklab, var(--lane) 55%, transparent);
+  animation: laser-pulse 1.1s ease-in-out infinite;
+}
+@keyframes laser-pulse {
+  50% {
+    box-shadow: 0 0 9px 3px var(--lane), 0 0 26px 9px color-mix(in oklab, var(--lane) 45%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .laser-head {
+    animation: none;
+  }
+  .laser-track {
+    transition: none !important;
   }
 }

@@ -7,12 +7,13 @@ import { testLabel } from "@/lib/format";
 import { useGetMeQuery, useGetStandingsQuery } from "@/store/api";
 import type { CompetitionDetail, CompetitionStatus } from "@/store/types";
 import { AlertIcon } from "@/components/ui/icons";
-import { primaryButtonCls, Skeleton } from "@/components/ui/states";
+import { primaryButtonCls, Skeleton, Spinner } from "@/components/ui/states";
 import { JoinButton } from "@/components/competitions/JoinButton";
-import { Standings } from "@/components/competitions/Standings";
 import { useServerClock } from "@/components/competitions/useServerClock";
 import { RaceCountdown } from "./RaceCountdown";
 import { RaceLobby } from "./RaceLobby";
+import { RaceResults } from "./RaceResults";
+import { RaceRun } from "./RaceRun";
 import { useRaceConnection, useRaceEvents, useRacePresence } from "./useRaceChannel";
 
 // Ably is browser-only: connect once someone is actually in the race.
@@ -92,12 +93,10 @@ function RaceRoom({ comp, me }: { comp: CompetitionDetail; me: string }) {
     body = <RaceLobby comp={comp} players={players} online={online} me={me} nowMs={nowMs} />;
   } else if (nowMs < Date.parse(comp.startsAt)) {
     body = <RaceCountdown msLeft={Date.parse(comp.startsAt) - nowMs} />;
+  } else if (!comp.words) {
+    body = <Spinner label="Loading the text…" />;
   } else {
-    body = (
-      <Panel>
-        <p className="text-2xl font-semibold tracking-tight text-text">The race is on</p>
-      </Panel>
-    );
+    body = <RaceRun comp={comp} words={comp.words} me={me} online={online} players={players} />;
   }
 
   return (
@@ -122,7 +121,7 @@ export function RaceView({ comp, status }: Props) {
   let body: React.ReactNode;
   if (status === "ended") {
     body = started ? (
-      <Standings slug={comp.slug} status={status} me={user?.username} />
+      <RaceResults slug={comp.slug} me={user?.username} />
     ) : (
       <Panel>
         <p className="text-2xl font-semibold tracking-tight text-text">This lobby has closed</p>

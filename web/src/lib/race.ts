@@ -30,3 +30,14 @@ export interface RaceFinishEvent {
 export function formatRaceTime(ms: number): string {
   return `${(ms / 1000).toFixed(2)}s`;
 }
+
+/** What each player broadcasts ~10×/s while racing. */
+export interface RaceProgressEvent {
+  username: string;
+  /** 0–1 share of the text typed correctly. */
+  p: number;
+  wpm: number;
+}
+
+/** Lasers have four colors; players keep theirs by join order, so everyone sees the same. */
+export const RACE_LANES = 4;
