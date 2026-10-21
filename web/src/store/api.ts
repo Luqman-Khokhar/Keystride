@@ -8,6 +8,8 @@ import type {
   CompetitionPage,
   CompetitionStatus,
   CreateCompetitionInput,
+  CreateRaceInput,
+  RaceStartResponse,
   Standings,
   HistoryPage,
   Leaderboard,
@@ -103,6 +105,14 @@ export const api = createApi({
       query: (body) => ({ url: "/competitions", method: "POST", body }),
       invalidatesTags: ["Competitions"],
     }),
+    createRace: b.mutation<{ slug: string }, CreateRaceInput>({
+      query: (body) => ({ url: "/competitions/races", method: "POST", body }),
+      invalidatesTags: ["Competitions"],
+    }),
+    startRace: b.mutation<RaceStartResponse, string>({
+      query: (slug) => ({ url: `/competitions/${encodeURIComponent(slug)}/start`, method: "POST", body: {} }),
+      invalidatesTags: (_r, _e, slug) => [{ type: "Competition", id: slug }],
+    }),
     joinCompetition: b.mutation<{ joined: boolean }, string>({
       query: (slug) => ({ url: `/competitions/${encodeURIComponent(slug)}/join`, method: "POST", body: {} }),
       invalidatesTags: (_r, _e, slug) => [
@@ -143,6 +153,8 @@ export const {
   useGetCompetitionQuery,
   useGetStandingsQuery,
   useCreateCompetitionMutation,
+  useCreateRaceMutation,
+  useStartRaceMutation,
   useJoinCompetitionMutation,
   useSubmitAttemptMutation,
   useDeleteCompetitionMutation,

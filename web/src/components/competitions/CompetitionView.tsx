@@ -9,13 +9,13 @@ import {
   errorStatus,
   useGetCompetitionQuery,
   useGetMeQuery,
-  useJoinCompetitionMutation,
 } from "@/store/api";
 import type { CompetitionDetail, CompetitionStatus } from "@/store/types";
 import { ErrorState, primaryButtonCls, Skeleton, Spinner } from "@/components/ui/states";
-import { AlertIcon } from "@/components/ui/icons";
 import { StatusPage } from "@/components/ui/StatusPage";
+import { RaceView } from "@/components/race/RaceView";
 import { CompetitionDetails } from "./CompetitionDetails";
+import { JoinButton } from "./JoinButton";
 import { Standings } from "./Standings";
 import { useServerClock } from "./useServerClock";
 
@@ -29,23 +29,6 @@ function Panel({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-surface border border-line px-6 py-10 text-center">
       {children}
-    </div>
-  );
-}
-
-function JoinButton({ slug }: { slug: string }) {
-  const [join, { isLoading, error }] = useJoinCompetitionMutation();
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <button type="button" disabled={isLoading} onClick={() => join(slug)} className={primaryButtonCls}>
-        {isLoading ? "Joining…" : "Join competition"}
-      </button>
-      {error && (
-        <p role="alert" className="flex items-center gap-1.5 text-sm text-error">
-          <AlertIcon className="size-4" />
-          {errorMessage(error, "Couldn't join")}
-        </p>
-      )}
     </div>
   );
 }
@@ -190,6 +173,7 @@ export function CompetitionView({ slug }: { slug: string }) {
   if (error || !comp || !status) {
     return <ErrorState message={errorMessage(error, "Couldn't load this competition")} onRetry={refetch} />;
   }
+  if (comp.kind === "race") return <RaceView comp={comp} status={status} />;
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">

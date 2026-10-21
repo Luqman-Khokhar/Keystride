@@ -2,9 +2,10 @@ import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
 import type { PipelineStage, Types } from "mongoose";
 import type { TestConfig } from "@keystride/engine";
-import { competitionWords, matchesCompetition, newSlug } from "../lib/competition";
+import { RACE_LOBBY_MS, competitionWords, matchesCompetition, newSlug, raceWindow } from "../lib/competition";
 import { HttpError, parse, userId } from "../lib/http";
 import { MongoRateLimitStore } from "../lib/rateLimitStore";
+import { publishRace, raceTokenRequest } from "../lib/realtime";
 import { verifySubmission } from "../lib/verify";
 import { requireAuth } from "../middleware/auth";
 import { CompetitionModel, statusOf, type Competition } from "../models/Competition";
@@ -14,6 +15,7 @@ import { UserModel } from "../models/User";
 import {
   competitionListQuery,
   createCompetitionSchema,
+  createRaceSchema,
   slugParams,
   submissionSchema,
 } from "../schemas";
@@ -64,6 +66,7 @@ async function usernamesById(ids: Types.ObjectId[]) {
 function summary(c: CompDoc, creator: string | undefined, now: Date) {
   return {
     slug: c.slug,
+    kind: c.kind ?? "standard",
     title: c.title,
     creator: creator ?? "[deleted]",
     config: c.config as TestConfig,
@@ -94,23 +97,54 @@ competitionsRouter.post("/", requireAuth, createLimiter, async (req, res) => {
   const endsAt = new Date(startsAt.getTime() + input.durationMinutes * 60_000);
   const config = input.config as TestConfig;
 
+  const slug = await insertCompetition(uid, {
+    title: input.title,
+    description: input.description,
+    config,
+    words: competitionWords(config),
+    visibility: input.visibility,
+    startsAt,
+    endsAt,
+    maxPlayers: input.maxPlayers,
+    maxAttempts: input.maxAttempts,
+  });
+  res.status(201).json({ slug });
+});
+
+competitionsRouter.post("/races", requireAuth, createLimiter, async (req, res) => {
+  const input = parse(createRaceSchema, req.body);
+  const uid = userId(req);
+  const config: TestConfig = {
+    mode: "words",
+    amount: input.words,
+    punctuation: input.punctuation,
+    numbers: input.numbers,
+    language: "english",
+  };
+  // Lobby: startsAt = endsAt = expiry, so it stays "upcoming" until the host starts it.
+  const expiresAt = new Date(Date.now() + RACE_LOBBY_MS);
+
+  const slug = await insertCompetition(uid, {
+    kind: "race",
+    title: input.title,
+    config,
+    words: competitionWords(config),
+    visibility: "unlisted",
+    startsAt: expiresAt,
+    endsAt: expiresAt,
+    maxPlayers: input.maxPlayers,
+    maxAttempts: 1,
+    race: { startedAt: null },
+  });
+  res.status(201).json({ slug });
+});
+
+/** Creates a competition under a fresh slug, with its creator as the first player. */
+async function insertCompetition(uid: Types.ObjectId, fields: Record<string, unknown>): Promise<string> {
   let comp: CompDoc | null = null;
   for (let tries = 0; !comp && tries < 5; tries++) {
     try {
-      const doc = await CompetitionModel.create({
-        slug: newSlug(),
-        title: input.title,
-        description: input.description,
-        creatorId: uid,
-        config,
-        words: competitionWords(config),
-        visibility: input.visibility,
-        startsAt,
-        endsAt,
-        maxPlayers: input.maxPlayers,
-        maxAttempts: input.maxAttempts,
-        playerCount: 1,
-      });
+      const doc = await CompetitionModel.create({ ...fields, slug: newSlug(), creatorId: uid, playerCount: 1 });
       comp = doc.toObject() as CompDoc;
     } catch (err) {
       // Slug collision: try another code.
@@ -121,8 +155,8 @@ competitionsRouter.post("/", requireAuth, createLimiter, async (req, res) => {
 
   // The creator is always the first player.
   await CompetitionEntryModel.create({ competitionId: comp._id, userId: uid });
-  res.status(201).json({ slug: comp.slug });
-});
+  return comp.slug;
+}
 
 // ---- list --------------------------------------------------------------------
 
@@ -183,13 +217,16 @@ competitionsRouter.get("/:slug", async (req, res) => {
     description: comp.description,
     serverNow: now,
     // The text stays secret until the start, so nobody can practise it.
-    words: status === "upcoming" ? null : comp.words,
+    // A started race shows it during the countdown, like the start event does.
+    words: status === "upcoming" && !comp.race?.startedAt ? null : comp.words,
+    race: comp.kind === "race" ? { startedAt: comp.race?.startedAt ?? null } : null,
     me: req.userId
       ? {
           joined: !!entry,
           isCreator: String(comp.creatorId) === String(req.userId),
           attempts: entry?.attempts ?? 0,
           best: entry?.best ?? null,
+          race: entry?.race ?? null,
         }
       : null,
   });
@@ -214,10 +251,18 @@ competitionsRouter.get("/:slug/standings", async (req, res) => {
       },
     },
     { $unwind: "$user" },
-    { $addFields: { scored: { $cond: [{ $gt: ["$best.wpm", null] }, 1, 0] } } },
-    { $sort: { scored: -1, "best.wpm": -1, "best.at": 1, joinedAt: 1 } },
+    ...(comp.kind === "race"
+      ? // Races: verified finishers by finish time, then everyone else.
+        [
+          { $addFields: { scored: { $cond: [{ $gt: ["$race.finishMs", null] }, 1, 0] } } },
+          { $sort: { scored: -1 as const, "race.finishMs": 1 as const, joinedAt: 1 as const } },
+        ]
+      : [
+          { $addFields: { scored: { $cond: [{ $gt: ["$best.wpm", null] }, 1, 0] } } },
+          { $sort: { scored: -1 as const, "best.wpm": -1 as const, "best.at": 1 as const, joinedAt: 1 as const } },
+        ]),
     { $limit: 100 },
-    { $project: { _id: 0, username: "$user.username", attempts: 1, joinedAt: 1, best: 1 } },
+    { $project: { _id: 0, username: "$user.username", attempts: 1, joinedAt: 1, best: 1, scored: 1, finishMs: "$race.finishMs" } },
   ];
   const rows = await CompetitionEntryModel.aggregate(pipeline);
 
@@ -227,13 +272,14 @@ competitionsRouter.get("/:slug/standings", async (req, res) => {
     serverNow: now,
     playerCount: comp.playerCount,
     entries: rows.map((r) => ({
-      rank: r.best ? ++rank : null,
+      rank: r.scored ? ++rank : null,
       username: r.username,
       attempts: r.attempts,
       joinedAt: r.joinedAt,
       best: r.best
         ? { wpm: r.best.wpm, rawWpm: r.best.rawWpm, accuracy: r.best.accuracy, consistency: r.best.consistency, at: r.best.at }
         : null,
+      finishMs: r.finishMs ?? null,
     })),
   });
 });
@@ -250,13 +296,19 @@ competitionsRouter.post("/:slug/join", requireAuth, async (req, res) => {
     res.json({ joined: true });
     return;
   }
+  if (comp.race?.startedAt) throw new HttpError(409, "This race has already started");
 
-  // Reserve a seat atomically so concurrent joins can't exceed maxPlayers.
+  // Reserve a seat atomically so concurrent joins can't exceed maxPlayers
+  // (or slip into a race that started meanwhile; non-races have no race.startedAt).
   const seat = await CompetitionModel.findOneAndUpdate(
-    { _id: comp._id, $expr: { $lt: ["$playerCount", "$maxPlayers"] } },
+    { _id: comp._id, "race.startedAt": null, $expr: { $lt: ["$playerCount", "$maxPlayers"] } },
     { $inc: { playerCount: 1 } },
   );
-  if (!seat) throw new HttpError(409, "This competition is full");
+  if (!seat) {
+    throw new HttpError(409, comp.kind === "race" && comp.playerCount < comp.maxPlayers
+      ? "This race has already started"
+      : "This competition is full");
+  }
 
   try {
     await CompetitionEntryModel.create({ competitionId: comp._id, userId: uid });
@@ -283,11 +335,13 @@ competitionsRouter.post("/:slug/attempts", requireAuth, attemptLimiter, async (r
 
   // The test must have started after the competition opened, and been submitted
   // soon after it closed (a test started just before the end may finish late).
+  const isRace = comp.kind === "race";
   const testStartedAt = now - sub.durationMs;
-  if (testStartedAt < comp.startsAt.getTime() - 5_000) {
+  // Races unlock on a shared countdown, so allow only network jitter before the start.
+  if (testStartedAt < comp.startsAt.getTime() - (isRace ? 1_000 : 5_000)) {
     throw new HttpError(409, "This attempt started before the competition opened");
   }
-  const graceMs = (config.mode === "time" ? config.amount * 1000 : 5 * 60_000) + 30_000;
+  const graceMs = isRace ? 30_000 : (config.mode === "time" ? config.amount * 1000 : 5 * 60_000) + 30_000;
   if (now > comp.endsAt.getTime() + graceMs) throw new HttpError(409, "This competition has ended");
 
   const mismatch = matchesCompetition(sub, { config, words: comp.words });
@@ -360,6 +414,9 @@ competitionsRouter.post("/:slug/attempts", requireAuth, attemptLimiter, async (r
       })) + 1;
   }
 
+  let race: { finishMs: number; place: number } | null = null;
+  if (isRace) race = await recordRaceFinish(comp, entry._id, uid, flagReason ? null : now, result);
+
   res.status(201).json({
     resultId: String(doc._id),
     wpm: result.wpm,
@@ -369,9 +426,90 @@ competitionsRouter.post("/:slug/attempts", requireAuth, attemptLimiter, async (r
     improved,
     attempts: counted.attempts,
     attemptsLeft: capped ? Math.max(0, capped - counted.attempts) : null,
-    rank,
+    rank: race ? race.place : rank,
     best: fresh?.best?.wpm ?? null,
+    race,
   });
+});
+
+/**
+ * Records a race attempt: a verified finish (`finishedAt` set) gets its time from the server
+ * clock, so a late start costs time and device clocks don't matter. Once every player has
+ * used their attempt the race ends right away instead of waiting for the cap.
+ */
+async function recordRaceFinish(
+  comp: CompDoc,
+  entryId: Types.ObjectId,
+  uid: Types.ObjectId,
+  finishedAt: number | null,
+  result: { wpm: number; accuracy: number },
+): Promise<{ finishMs: number; place: number } | null> {
+  let race: { finishMs: number; place: number } | null = null;
+  if (finishedAt !== null) {
+    const finishMs = finishedAt - comp.startsAt.getTime();
+    await CompetitionEntryModel.updateOne({ _id: entryId }, { $set: { race: { finishMs } } });
+    // Standings sort by finishMs, so this place only feeds the live announcement.
+    const place =
+      (await CompetitionEntryModel.countDocuments({
+        competitionId: comp._id,
+        $or: [{ "race.finishMs": { $lt: finishMs } }, { "race.finishMs": finishMs, _id: { $lt: entryId } }],
+      })) + 1;
+    const user = await UserModel.findById(uid).select("username").lean();
+    await publishRace(comp.slug, "finish", {
+      username: user?.username ?? "[deleted]",
+      place,
+      wpm: result.wpm,
+      accuracy: result.accuracy,
+      finishMs,
+    });
+    race = { finishMs, place };
+  }
+
+  const pending = await CompetitionEntryModel.exists({ competitionId: comp._id, attempts: { $lt: 1 } });
+  if (!pending) {
+    const endsAt = new Date();
+    const ended = await CompetitionModel.updateOne({ _id: comp._id, endsAt: { $gt: endsAt } }, { $set: { endsAt } });
+    if (ended.modifiedCount) await publishRace(comp.slug, "end", { endsAt });
+  }
+  return race;
+}
+
+// ---- races ---------------------------------------------------------------------------
+
+competitionsRouter.post("/:slug/start", requireAuth, async (req, res) => {
+  const { slug } = parse(slugParams, req.params);
+  const uid = userId(req);
+  const comp = await findCompetition(slug, true);
+  if (comp.kind !== "race") throw new HttpError(404, "Race not found");
+  if (String(comp.creatorId) !== String(uid)) throw new HttpError(403, "Only the host can start the race");
+  if (comp.race?.startedAt) throw new HttpError(409, "This race has already started");
+  if (statusOf(comp) === "ended") throw new HttpError(409, "This lobby has expired. Create a new race.");
+  if (comp.playerCount < 2) throw new HttpError(409, "Wait for at least one more player");
+
+  const now = new Date();
+  const { startsAt, endsAt } = raceWindow(now.getTime(), (comp.config as TestConfig).amount);
+  // Atomic, so a double click can't restart the countdown.
+  const started = await CompetitionModel.findOneAndUpdate(
+    { _id: comp._id, "race.startedAt": null },
+    { $set: { "race.startedAt": now, startsAt, endsAt } },
+  );
+  if (!started) throw new HttpError(409, "This race has already started");
+
+  await publishRace(comp.slug, "start", { startsAt, endsAt, serverNow: now, words: comp.words });
+  res.json({ startsAt, endsAt, serverNow: now });
+});
+
+/** Ably token request scoped to this race, for joined players only. */
+competitionsRouter.get("/:slug/realtime-token", requireAuth, async (req, res) => {
+  const { slug } = parse(slugParams, req.params);
+  const uid = userId(req);
+  const comp = await findCompetition(slug);
+  if (comp.kind !== "race") throw new HttpError(404, "Race not found");
+  if (statusOf(comp) === "ended") throw new HttpError(409, "This race is over");
+  if (!(await CompetitionEntryModel.exists({ competitionId: comp._id, userId: uid }))) {
+    throw new HttpError(403, "Join the race first");
+  }
+  res.json(await raceTokenRequest(comp.slug, String(uid)));
 });
 
 // ---- delete ------------------------------------------------------------------------

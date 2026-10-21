@@ -1,7 +1,16 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { KEY_SPACE, coreWord, generateWords, type Keystroke, type ResultSubmission, type TestConfig } from "@keystride/engine";
-import { competitionWordCount, competitionWords, matchesCompetition, newSlug } from "./competition";
+import {
+  RACE_COUNTDOWN_MS,
+  competitionWordCount,
+  competitionWords,
+  matchesCompetition,
+  newSlug,
+  raceCapMs,
+  raceWindow,
+} from "./competition";
+import { raceCapability } from "./realtime";
 import { verifySubmission } from "./verify";
 
 const cfg = (over: Partial<TestConfig> = {}): TestConfig => ({
@@ -88,5 +97,27 @@ describe("newSlug", () => {
     const seen = new Set(Array.from({ length: 500 }, () => newSlug()));
     assert.equal(seen.size, 500);
     for (const s of seen) assert.match(s, /^[A-Za-z0-9]{8}$/);
+  });
+});
+
+describe("race timing", () => {
+  it("gives slow typists room to finish", () => {
+    assert.equal(raceCapMs(25), 105_000);
+    assert.equal(raceCapMs(50), 180_000);
+  });
+
+  it("starts after the countdown and ends after the cap", () => {
+    const { startsAt, endsAt } = raceWindow(1_000_000, 10);
+    assert.equal(startsAt.getTime(), 1_000_000 + RACE_COUNTDOWN_MS);
+    assert.equal(endsAt.getTime() - startsAt.getTime(), raceCapMs(10));
+  });
+});
+
+describe("raceCapability", () => {
+  it("lets players only listen to server events and talk on their own race", () => {
+    assert.deepEqual(raceCapability("abc12345"), {
+      "race:abc12345": ["subscribe"],
+      "race-live:abc12345": ["publish", "subscribe", "presence"],
+    });
   });
 });
