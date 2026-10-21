@@ -26,6 +26,22 @@ export interface RaceFinishEvent {
   finishMs: number;
 }
 
+export interface RaceRematchEvent {
+  slug: string;
+  by: string;
+}
+
+export interface RaceRematchJoinEvent {
+  slug: string;
+  username: string;
+  /** Everyone in the rematch lobby so far, in join order. */
+  players: string[];
+  maxPlayers: number;
+}
+
+/** Finished races keep their players connected this long, for rematches (matches the API). */
+export const RACE_REMATCH_WINDOW_MS = 30 * 60 * 1000;
+
 /** 12345 → "12.35s" */
 export function formatRaceTime(ms: number): string {
   return `${(ms / 1000).toFixed(2)}s`;

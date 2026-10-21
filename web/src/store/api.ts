@@ -113,6 +113,10 @@ export const api = createApi({
       query: (slug) => ({ url: `/competitions/${encodeURIComponent(slug)}/start`, method: "POST", body: {} }),
       invalidatesTags: (_r, _e, slug) => [{ type: "Competition", id: slug }],
     }),
+    rematchRace: b.mutation<{ slug: string }, string>({
+      query: (slug) => ({ url: `/competitions/${encodeURIComponent(slug)}/rematch`, method: "POST", body: {} }),
+      invalidatesTags: (_r, _e, slug) => [{ type: "Competition", id: slug }],
+    }),
     joinCompetition: b.mutation<{ joined: boolean }, string>({
       query: (slug) => ({ url: `/competitions/${encodeURIComponent(slug)}/join`, method: "POST", body: {} }),
       invalidatesTags: (_r, _e, slug) => [
@@ -155,6 +159,7 @@ export const {
   useCreateCompetitionMutation,
   useCreateRaceMutation,
   useStartRaceMutation,
+  useRematchRaceMutation,
   useJoinCompetitionMutation,
   useSubmitAttemptMutation,
   useDeleteCompetitionMutation,

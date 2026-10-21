@@ -116,7 +116,13 @@ export interface CompetitionDetail extends CompetitionSummary {
   /** null until the competition starts. */
   words: string[] | null;
   /** Races only. startedAt is null while the lobby is open. */
-  race: { startedAt: string | null } | null;
+  race: {
+    startedAt: string | null;
+    /** Lobby opened by "Rematch" after this race. */
+    rematchSlug: string | null;
+    /** The race this lobby is a rematch of. */
+    rematchOf: string | null;
+  } | null;
   me: {
     joined: boolean;
     isCreator: boolean;

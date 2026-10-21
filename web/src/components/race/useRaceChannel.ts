@@ -24,7 +24,7 @@ export function useRaceEvents(slug: string) {
           d.endsAt = e.endsAt;
           d.serverNow = e.serverNow;
           d.words = e.words;
-          d.race = { startedAt: e.serverNow };
+          d.race = { startedAt: e.serverNow, rematchSlug: null, rematchOf: d.race?.rematchOf ?? null };
         }),
       );
     } else if (msg.name === "finish") {
