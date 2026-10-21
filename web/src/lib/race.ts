@@ -6,6 +6,13 @@ export const raceLiveChannel = (slug: string) => `race-live:${slug}`;
 export const RACE_WORD_OPTIONS = [10, 25, 50] as const;
 export const RACE_PLAYER_OPTIONS = [2, 3, 4] as const;
 
+/** How progress is drawn in the race: glowing lasers or pixel runners. */
+export type RaceTrackStyle = "laser" | "runners";
+export const RACE_TRACK_OPTIONS: readonly { value: RaceTrackStyle; label: string }[] = [
+  { value: "laser", label: "Lasers" },
+  { value: "runners", label: "Runners" },
+];
+
 /** What each player shares in the lobby's presence set. */
 export interface RacePresence {
   username: string;

@@ -1,4 +1,5 @@
 import type { TestConfig } from "@keystride/engine";
+import type { RaceTrackStyle } from "@/lib/race";
 
 export interface User {
   id: string;
@@ -122,6 +123,7 @@ export interface CompetitionDetail extends CompetitionSummary {
     rematchSlug: string | null;
     /** The race this lobby is a rematch of. */
     rematchOf: string | null;
+    track: RaceTrackStyle;
   } | null;
   me: {
     joined: boolean;
@@ -172,6 +174,7 @@ export interface CreateRaceInput {
   punctuation: boolean;
   numbers: boolean;
   maxPlayers: number;
+  track: RaceTrackStyle;
 }
 
 export interface RaceStartResponse {

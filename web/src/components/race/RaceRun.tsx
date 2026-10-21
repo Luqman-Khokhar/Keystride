@@ -47,6 +47,7 @@ export function RaceRun({ comp, words, me, online, players }: Props) {
   const phase = useSyncExternalStore(session.subscribe, session.getPhase, session.getPhase);
   const inputRef = useRef<HTMLInputElement>(null);
   const { rivalCarets } = useSettings();
+  const track = comp.race?.track ?? "laser";
   useFocusMode(phase);
 
   // Own laser follows every keystroke, no network involved.
@@ -160,7 +161,7 @@ export function RaceRun({ comp, words, me, online, players }: Props) {
   if (phase === "finished" && session.submission) {
     return (
       <div className="flex flex-col gap-5">
-        <RaceTrack lanes={lanes} />
+        <RaceTrack lanes={lanes} variant={track} />
         <RaceAttempt slug={comp.slug} submission={session.submission} />
       </div>
     );
@@ -168,7 +169,7 @@ export function RaceRun({ comp, words, me, online, players }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <RaceTrack lanes={lanes} compact />
+      <RaceTrack lanes={lanes} variant={track} compact />
       {meLane && <RaceHud me={meLane} rivals={rivalLanes} place={place} totalWords={words.length} change={change} />}
       <div className="relative -mx-3 px-3 py-2">
         {/* Keyed overlay, so the tint replays without remounting the typing area. */}

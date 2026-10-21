@@ -128,7 +128,7 @@ competitionsRouter.post("/races", requireAuth, createLimiter, async (req, res) =
     numbers: input.numbers,
     language: "english",
   };
-  const slug = await insertRace(uid, input.title, config, input.maxPlayers, null);
+  const slug = await insertRace(uid, input.title, config, input.maxPlayers, input.track, null);
   res.status(201).json({ slug });
 });
 
@@ -138,6 +138,7 @@ function insertRace(
   title: string,
   config: TestConfig,
   maxPlayers: number,
+  track: string,
   rematchOf: string | null,
 ): Promise<string> {
   const expiresAt = new Date(Date.now() + RACE_LOBBY_MS);
@@ -151,7 +152,7 @@ function insertRace(
     endsAt: expiresAt,
     maxPlayers,
     maxAttempts: 1,
-    race: { startedAt: null, rematchSlug: null, rematchOf },
+    race: { startedAt: null, rematchSlug: null, rematchOf, track },
   });
 }
 
@@ -241,6 +242,7 @@ competitionsRouter.get("/:slug", async (req, res) => {
             startedAt: comp.race?.startedAt ?? null,
             rematchSlug: comp.race?.rematchSlug ?? null,
             rematchOf: comp.race?.rematchOf ?? null,
+            track: comp.race?.track ?? "laser",
           }
         : null,
     me: req.userId
@@ -558,7 +560,14 @@ competitionsRouter.post("/:slug/rematch", requireAuth, createLimiter, async (req
     return;
   }
 
-  const rematch = await insertRace(uid, comp.title, comp.config as TestConfig, comp.maxPlayers, comp.slug);
+  const rematch = await insertRace(
+    uid,
+    comp.title,
+    comp.config as TestConfig,
+    comp.maxPlayers,
+    comp.race.track ?? "laser",
+    comp.slug,
+  );
   const claimed = await CompetitionModel.findOneAndUpdate(
     { _id: comp._id, "race.rematchSlug": null },
     { $set: { "race.rematchSlug": rematch } },

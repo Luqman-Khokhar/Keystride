@@ -310,6 +310,71 @@ body {
   }
 }
 
+/*
+ * Pixel runners: frame 1 (stride) and frame 2 (passing) swap every half cycle, with a
+ * one-pixel bob; --run-dur comes from the racer's wpm. Idle stands on frame 2, a win hops.
+ */
+.runner-body {
+  fill: var(--lane);
+}
+.runner-light {
+  fill: color-mix(in oklab, var(--lane) 35%, white);
+}
+.runner-eye {
+  fill: var(--bg);
+}
+.runner-f1 {
+  opacity: 0;
+}
+.runner[data-state="run"] .runner-f1 {
+  animation: runner-frame var(--run-dur) linear infinite;
+}
+.runner[data-state="run"] .runner-f2 {
+  animation: runner-frame var(--run-dur) linear infinite calc(var(--run-dur) / -2);
+}
+.runner[data-state="run"] .runner-all {
+  animation: runner-bob var(--run-dur) linear infinite;
+}
+.runner[data-state="win"] .runner-all {
+  animation: runner-hop 0.45s ease-out 4;
+}
+@keyframes runner-frame {
+  0%,
+  49.99% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes runner-bob {
+  0%,
+  49.99% {
+    transform: translateY(0);
+  }
+  50%,
+  100% {
+    transform: translateY(-1px);
+  }
+}
+@keyframes runner-hop {
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .runner .runner-f1,
+  .runner .runner-f2,
+  .runner .runner-all {
+    animation: none !important;
+  }
+  .runner .runner-f1 {
+    opacity: 0;
+  }
+}
+
 /* Other racers' carets, drawn inside the text in their laser color. */
 .rival-caret {
   position: absolute;
