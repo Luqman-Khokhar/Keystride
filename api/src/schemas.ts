@@ -85,6 +85,19 @@ export const createCompetitionSchema = z.object({
     .default(null),
 });
 
+export const RACE_WORD_OPTIONS = [10, 25, 50] as const;
+
+export const createRaceSchema = z.object({
+  title: z.string().trim().min(3, "At least 3 characters").max(60, "At most 60 characters"),
+  words: z
+    .number()
+    .int()
+    .refine((n) => (RACE_WORD_OPTIONS as readonly number[]).includes(n), "Unsupported race length"),
+  punctuation: z.boolean().default(false),
+  numbers: z.boolean().default(false),
+  maxPlayers: z.number().int().min(2, "At least 2 players").max(4, "At most 4 players").default(4),
+});
+
 export const competitionListQuery = z.object({
   status: z.enum(["live", "upcoming", "ended", "mine"]).default("live"),
   limit: z.coerce.number().int().min(1).max(50).default(20),

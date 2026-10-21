@@ -20,11 +20,18 @@ const entrySchema = new Schema({
     ),
     default: null,
   },
+  /** Races only: verified finish, in ms after the start. */
+  race: {
+    type: new Schema({ finishMs: Number }, { _id: false }),
+    default: null,
+  },
 });
 
 entrySchema.index({ competitionId: 1, userId: 1 }, { unique: true });
 // Standings: best score first, earlier achievement wins ties.
 entrySchema.index({ competitionId: 1, "best.wpm": -1, "best.at": 1 });
+// Race standings: earliest finish first.
+entrySchema.index({ competitionId: 1, "race.finishMs": 1 });
 // "My competitions".
 entrySchema.index({ userId: 1, joinedAt: -1 });
 

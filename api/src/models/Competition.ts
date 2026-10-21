@@ -7,6 +7,8 @@ const competitionSchema = new Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, default: "" },
     creatorId: { type: Types.ObjectId, ref: "User", required: true },
+    /** "race": everyone starts together when the host says go; one attempt, ranked by finish time. */
+    kind: { type: String, enum: ["standard", "race"], default: "standard" },
     config: {
       mode: { type: String, enum: ["time", "words"], required: true },
       amount: { type: Number, required: true },
@@ -23,6 +25,14 @@ const competitionSchema = new Schema(
     /** null = unlimited. */
     maxAttempts: { type: Number, default: null },
     playerCount: { type: Number, default: 0 },
+    /**
+     * Races only. Until the host starts, startsAt = endsAt = lobby expiry, so the race
+     * reads as "upcoming" (text hidden) and then "ended" — never live without a start.
+     */
+    race: {
+      type: new Schema({ startedAt: { type: Date, default: null } }, { _id: false }),
+      default: null,
+    },
     deletedAt: { type: Date, default: null },
   },
   { timestamps: { createdAt: true, updatedAt: false } },

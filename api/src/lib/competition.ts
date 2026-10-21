@@ -45,3 +45,19 @@ export function matchesCompetition(
   }
   return null;
 }
+
+/** An unstarted race lobby closes after this long. */
+export const RACE_LOBBY_MS = 60 * 60 * 1000;
+/** Countdown between the host pressing start and the text unlocking. */
+export const RACE_COUNTDOWN_MS = 5_000;
+
+/** Longest a race may run: the full text at 20 wpm, plus 30 seconds. */
+export function raceCapMs(words: number): number {
+  return words * 3_000 + 30_000;
+}
+
+/** Start and end of a race the host starts at `now`. */
+export function raceWindow(now: number, words: number): { startsAt: Date; endsAt: Date } {
+  const startsAt = now + RACE_COUNTDOWN_MS;
+  return { startsAt: new Date(startsAt), endsAt: new Date(startsAt + raceCapMs(words)) };
+}
