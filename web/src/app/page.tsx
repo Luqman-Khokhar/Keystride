@@ -16,7 +16,7 @@ export default function Home() {
           url: SITE_URL,
           applicationCategory: "EducationalApplication",
           operatingSystem: "Any",
-          description: "Free, minimal typing speed test with live WPM, accuracy, themes, a verified leaderboard and typing competitions.",
+          description: "Free, minimal typing speed test with live WPM, accuracy, themes, a verified leaderboard and live typing races.",
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         })}
       />

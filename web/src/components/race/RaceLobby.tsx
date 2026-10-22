@@ -37,6 +37,12 @@ export function RaceLobby({ comp, players, online, me, nowMs }: Props) {
         </span>
       </div>
 
+      <p className="-mt-2 text-sm text-sub">
+        {isHost
+          ? "Share the invite link so friends can join. Start once at least one of them is online."
+          : `You're in. Stay on this page; the race starts for everyone when ${comp.creator} presses start.`}
+      </p>
+
       {!players ? (
         <div className="flex flex-col gap-2" aria-busy="true" aria-label="Loading players">
           {Array.from({ length: comp.maxPlayers }, (_, i) => (
