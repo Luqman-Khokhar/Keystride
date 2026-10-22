@@ -4,6 +4,7 @@ import Link from "next/link";
 import { formatRaceTime } from "@/lib/race";
 import { errorMessage, useGetStandingsQuery } from "@/store/api";
 import { buttonCls, ErrorState, primaryButtonCls, Skeleton } from "@/components/ui/states";
+import { DeviceBadge } from "./DeviceBadge";
 
 /** Final order: finishers by time, then everyone who didn't finish. */
 export function RaceResults({ slug, me, actions }: { slug: string; me?: string; actions?: React.ReactNode }) {
@@ -38,9 +39,12 @@ export function RaceResults({ slug, me, actions }: { slug: string; me?: string; 
                 <span className={`font-mono text-lg ${e.rank === 1 ? "text-main" : "text-sub"}`}>
                   {finished ? `#${e.rank}` : "–"}
                 </span>
-                <span className="truncate text-text">
-                  {e.username}
-                  {isMe && <span className="ml-1.5 text-xs text-main">(you)</span>}
+                <span className="flex min-w-0 flex-col items-start gap-1">
+                  <span className="max-w-full truncate text-text">
+                    {e.username}
+                    {isMe && <span className="ml-1.5 text-xs text-main">(you)</span>}
+                  </span>
+                  <DeviceBadge device={e.device} />
                 </span>
                 {finished && e.best ? (
                   <span className="text-right text-sm">

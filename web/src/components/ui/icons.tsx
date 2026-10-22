@@ -51,6 +51,24 @@ export function TrophyIcon(p: IconProps) {
   );
 }
 
+export function PhoneIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="6.5" y="2.5" width="11" height="19" rx="2.5" />
+      <path d="M11 18.5h2" />
+    </Svg>
+  );
+}
+
+export function MonitorIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="2.5" y="4" width="19" height="13" rx="2" />
+      <path d="M8 21h8M12 17v4" />
+    </Svg>
+  );
+}
+
 export function UserIcon(p: IconProps) {
   return (
     <Svg {...p}>

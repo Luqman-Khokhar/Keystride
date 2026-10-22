@@ -20,6 +20,11 @@ const entrySchema = new Schema({
     ),
     default: null,
   },
+  /** Device the player joined or last raced on, parsed from request headers. */
+  device: {
+    type: new Schema({ type: String, os: String, browser: String }, { _id: false }),
+    default: null,
+  },
   /** Races only: verified finish, in ms after the start. */
   race: {
     type: new Schema({ finishMs: Number }, { _id: false }),
