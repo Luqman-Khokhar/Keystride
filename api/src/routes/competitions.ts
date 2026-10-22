@@ -10,6 +10,7 @@ import {
   newSlug,
   raceWindow,
 } from "../lib/competition";
+import { deviceFrom, type Device } from "../lib/device";
 import { HttpError, parse, userId } from "../lib/http";
 import { MongoRateLimitStore } from "../lib/rateLimitStore";
 import { publishRace, raceTokenRequest } from "../lib/realtime";
@@ -114,7 +115,7 @@ competitionsRouter.post("/", requireAuth, createLimiter, async (req, res) => {
     endsAt,
     maxPlayers: input.maxPlayers,
     maxAttempts: input.maxAttempts,
-  });
+  }, deviceFrom(req.headers));
   res.status(201).json({ slug });
 });
 
@@ -128,7 +129,7 @@ competitionsRouter.post("/races", requireAuth, createLimiter, async (req, res) =
     numbers: input.numbers,
     language: "english",
   };
-  const slug = await insertRace(uid, input.title, config, input.maxPlayers, input.track, null);
+  const slug = await insertRace(uid, input.title, config, input.maxPlayers, input.track, null, deviceFrom(req.headers));
   res.status(201).json({ slug });
 });
 
@@ -140,6 +141,7 @@ function insertRace(
   maxPlayers: number,
   track: string,
   rematchOf: string | null,
+  device: Device,
 ): Promise<string> {
   const expiresAt = new Date(Date.now() + RACE_LOBBY_MS);
   return insertCompetition(uid, {
@@ -153,11 +155,11 @@ function insertRace(
     maxPlayers,
     maxAttempts: 1,
     race: { startedAt: null, rematchSlug: null, rematchOf, track },
-  });
+  }, device);
 }
 
 /** Creates a competition under a fresh slug, with its creator as the first player. */
-async function insertCompetition(uid: Types.ObjectId, fields: Record<string, unknown>): Promise<string> {
+async function insertCompetition(uid: Types.ObjectId, fields: Record<string, unknown>, device: Device): Promise<string> {
   let comp: CompDoc | null = null;
   for (let tries = 0; !comp && tries < 5; tries++) {
     try {
@@ -171,7 +173,7 @@ async function insertCompetition(uid: Types.ObjectId, fields: Record<string, unk
   if (!comp) throw new HttpError(500, "Couldn't create the competition. Please try again.");
 
   // The creator is always the first player.
-  await CompetitionEntryModel.create({ competitionId: comp._id, userId: uid });
+  await CompetitionEntryModel.create({ competitionId: comp._id, userId: uid, device });
   return comp.slug;
 }
 
@@ -287,7 +289,7 @@ competitionsRouter.get("/:slug/standings", async (req, res) => {
           { $sort: { scored: -1 as const, "best.wpm": -1 as const, "best.at": 1 as const, joinedAt: 1 as const } },
         ]),
     { $limit: 100 },
-    { $project: { _id: 0, username: "$user.username", attempts: 1, joinedAt: 1, best: 1, scored: 1, finishMs: "$race.finishMs" } },
+    { $project: { _id: 0, username: "$user.username", attempts: 1, joinedAt: 1, best: 1, scored: 1, finishMs: "$race.finishMs", device: 1 } },
   ];
   const rows = await CompetitionEntryModel.aggregate(pipeline);
 
@@ -305,6 +307,7 @@ competitionsRouter.get("/:slug/standings", async (req, res) => {
         ? { wpm: r.best.wpm, rawWpm: r.best.rawWpm, accuracy: r.best.accuracy, consistency: r.best.consistency, at: r.best.at }
         : null,
       finishMs: r.finishMs ?? null,
+      device: r.device ?? null,
     })),
   });
 });
@@ -316,8 +319,10 @@ competitionsRouter.post("/:slug/join", requireAuth, async (req, res) => {
   const uid = userId(req);
   const comp = await findCompetition(slug);
   if (statusOf(comp) === "ended") throw new HttpError(409, "This competition has ended");
+  const device = deviceFrom(req.headers);
 
-  if (await CompetitionEntryModel.exists({ competitionId: comp._id, userId: uid })) {
+  // Already in: refresh the device, so rejoining from a phone shows as a phone.
+  if (await CompetitionEntryModel.findOneAndUpdate({ competitionId: comp._id, userId: uid }, { $set: { device } })) {
     res.json({ joined: true });
     return;
   }
@@ -336,7 +341,7 @@ competitionsRouter.post("/:slug/join", requireAuth, async (req, res) => {
   }
 
   try {
-    await CompetitionEntryModel.create({ competitionId: comp._id, userId: uid });
+    await CompetitionEntryModel.create({ competitionId: comp._id, userId: uid, device });
   } catch (err) {
     // Joined twice at once: give the seat back.
     await CompetitionModel.updateOne({ _id: comp._id }, { $inc: { playerCount: -1 } });
@@ -389,7 +394,7 @@ competitionsRouter.post("/:slug/attempts", requireAuth, attemptLimiter, async (r
   const capped = comp.maxAttempts ?? null;
   const counted = await CompetitionEntryModel.findOneAndUpdate(
     { _id: entry._id, ...(capped ? { attempts: { $lt: capped } } : {}) },
-    { $inc: { attempts: 1 } },
+    { $inc: { attempts: 1 }, $set: { device: deviceFrom(req.headers) } },
     { new: true },
   );
   if (!counted) throw new HttpError(409, "You've used all your attempts");
@@ -571,6 +576,7 @@ competitionsRouter.post("/:slug/rematch", requireAuth, createLimiter, async (req
     comp.maxPlayers,
     comp.race.track ?? "laser",
     comp.slug,
+    deviceFrom(req.headers),
   );
   const claimed = await CompetitionModel.findOneAndUpdate(
     { _id: comp._id, "race.rematchSlug": null },

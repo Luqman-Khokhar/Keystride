@@ -148,6 +148,14 @@ export interface StandingsEntry {
   best: CompetitionBest | null;
   /** Races only: verified finish, in ms after the start. */
   finishMs: number | null;
+  /** Device the player joined or last raced on; null for entries from before it was tracked. */
+  device: PlayerDevice | null;
+}
+
+export interface PlayerDevice {
+  type: "mobile" | "tablet" | "desktop";
+  os: string;
+  browser: string;
 }
 
 export interface Standings {

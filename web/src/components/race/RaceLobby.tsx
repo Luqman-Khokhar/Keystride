@@ -6,6 +6,7 @@ import type { CompetitionDetail, StandingsEntry } from "@/store/types";
 import { AlertIcon } from "@/components/ui/icons";
 import { primaryButtonCls, Skeleton } from "@/components/ui/states";
 import { ShareButton } from "@/components/competitions/ShareButton";
+import { DeviceBadge } from "./DeviceBadge";
 
 interface Props {
   comp: CompetitionDetail;
@@ -70,6 +71,7 @@ export function RaceLobby({ comp, players, online, me, nowMs }: Props) {
                   {p.username === me && <span className="ml-1.5 text-xs text-main">(you)</span>}
                 </span>
                 {isHostRow && <span className="rounded bg-bg-alt px-1.5 py-0.5 text-xs text-sub">host</span>}
+                <DeviceBadge device={p.device} />
                 <span className={`text-xs ${isOnline ? "text-main" : "text-sub"}`}>{isOnline ? "Online" : "Away"}</span>
               </li>
             );
