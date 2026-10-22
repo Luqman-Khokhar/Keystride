@@ -1,20 +1,15 @@
 import type { Metadata } from "next";
-import { CompetitionList } from "@/components/competitions/CompetitionList";
-import { apiGet } from "@/lib/site";
-import type { CompetitionPage } from "@/store/types";
+import { RaceIntro } from "@/components/race/RaceIntro";
 
 export const metadata: Metadata = {
-  title: "Typing competitions",
-  description: "Join live typing competitions or create your own and race friends on the same text.",
+  title: "Typing races",
+  description: "Start a live typing race, share the link and race friends on the same text.",
 };
 
-export default async function CompetitionsPage() {
-  // Live public competitions rendered on the server (refreshed every 30s) for a real first paint.
-  const initial = await apiGet<CompetitionPage>("/competitions?status=live&limit=12", 30);
-
+export default function CompetitionsPage() {
   return (
     <main className="flex flex-1 flex-col py-10">
-      <CompetitionList initial={initial} />
+      <RaceIntro />
     </main>
   );
 }
