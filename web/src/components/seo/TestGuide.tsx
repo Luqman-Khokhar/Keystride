@@ -20,7 +20,7 @@ export const FAQ = [
   },
   {
     q: "Are the results saved?",
-    a: "Tests work without an account. Sign in to save every result, track personal bests, appear on the leaderboard and join competitions.",
+    a: "Tests work without an account. Sign in to save every result, track personal bests, appear on the leaderboard and join races.",
   },
 ];
 
@@ -72,7 +72,7 @@ export function TestGuide({ intro, currentSlug }: { intro?: string; currentSlug?
           <li>
             Race friends in a{" "}
             <Link href="/competitions" className={linkCls}>
-              typing competition
+              live typing race
             </Link>{" "}
             to stay motivated.
           </li>

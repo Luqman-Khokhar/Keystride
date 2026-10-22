@@ -128,7 +128,7 @@ export function AuthForms() {
           </p>
           <p className="text-sm text-sub">
             {mode === "login"
-              ? "Sign in to save results and join competitions."
+              ? "Sign in to save results and race friends."
               : "Save every result, track personal bests and get on the leaderboard."}
           </p>
         </div>

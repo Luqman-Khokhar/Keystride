@@ -19,6 +19,7 @@ export function RaceCountdown({ msLeft }: { msLeft: number }) {
         {seconds}
       </p>
       <p className="text-sm text-sub">The text unlocks at zero. Keep your fingers on the home row.</p>
+      <p className="text-xs text-sub">Type each word correctly to move on to the next. One attempt, first to finish wins.</p>
     </section>
   );
 }
